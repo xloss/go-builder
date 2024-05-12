@@ -1,6 +1,7 @@
 package builder
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 )
@@ -105,10 +106,16 @@ func TestUpdateQuery_getSet(t *testing.T) {
 	table := NewTable("table")
 
 	q := NewUpdate(table)
+
+	sql, err := q.getSet()
+	if !errors.Is(UpdateNoSets, err) {
+		t.Errorf("q.getSet() returned %v", err)
+	}
+
 	q.Set(table, "col1", "value1")
 	q.SetNow(table, "col2")
 
-	sql, err := q.getSet()
+	sql, err = q.getSet()
 	if err != nil {
 		t.Errorf("q.getSet() returned %v", err)
 	}
