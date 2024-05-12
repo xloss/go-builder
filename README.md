@@ -2,7 +2,7 @@
 ## Install
 Use `go get` to install this package.
 ```
-go get github.com/xloss/builder
+go get github.com/xloss/go-builder
 ```
 
 ## Usage
