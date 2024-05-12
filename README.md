@@ -1,4 +1,4 @@
-# PostreSQL Query Builder for "jackc/pgx"
+# PostgreSQL Query Builder for "jackc/pgx"
 ## Install
 Use `go get` to install this package.
 ```
