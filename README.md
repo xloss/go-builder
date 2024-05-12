@@ -7,7 +7,7 @@ go get github.com/xloss/go-builder
 
 ## Usage
 ### Basic usage
-#### Insert
+#### Select
 ```go
 table1 := builder.NewTable("table1")
 table2 := builder.NewTable("table2")
@@ -119,8 +119,8 @@ q := builder.NewUpdate(t)
 ```
 
 ##### Set
-`.Set(table *Table, column string, value any)` `table_hash.col = @value_hash`
-`.SetNow(table *Table, column string)` `table_hash.col = NOW()`
+* `.Set(table *Table, column string, value any)` `table_hash.col = @value_hash`
+* `.SetNow(table *Table, column string)` `table_hash.col = NOW()`
 
 ##### Where
 [See](#where)
