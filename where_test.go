@@ -310,6 +310,43 @@ func TestWhereMoreColumn_Gen(t *testing.T) {
 	}
 }
 
+func TestWhereILike_Gen(t *testing.T) {
+	table := NewTable("table")
+	q := NewSelect()
+	q.From(table)
+
+	where := WhereILike{
+		Table:  table,
+		Column: "col",
+		Value:  "value",
+	}
+
+	sql, binds, err := where.Gen(q)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(binds) != 1 {
+		t.Errorf("bind len should be 1, but got %v", len(binds))
+	}
+
+	var (
+		tag, value string
+	)
+
+	for k, v := range binds {
+		tag, value = k, v.(string)
+	}
+
+	if value != where.Value {
+		t.Errorf("value is wrong")
+	}
+
+	if sql != table.Alias+".col ILIKE @"+tag {
+		t.Errorf("sql is wrong, sql is '%s'", sql)
+	}
+}
+
 func TestWhereFullText_Gen(t *testing.T) {
 	table := NewTable("table")
 	q := NewSelect()

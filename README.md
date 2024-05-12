@@ -68,15 +68,16 @@ q.From(table1, table2)
 .Where(where builder.Where)
 ```
 
-* `builder.WhereEq{Table *Table, Column string, Value any}` `table_hash.col = @value_hash`
+* `builder.WhereEq{Table *Table, Column string, Value interface{}}` `table_hash.col = @value_hash`
 * `builder.WhereIsNull{Table *Table, Column string}` `table_hash.col IS NULL`
 * `builder.WhereIsNotNull{Table *Table, Column string}` `table_hash.col IS NOT NULL`
 * `builder.WhereIn{Table *Table, Column string, Values interface{}}` `table_hash.col = ANY(@values_hash)`
-* `builder.WhereMore{Table *Table, Column string, Value any}` `table_hash.col > @value_hash`
-* `builder.WhereLess{Table *Table, Column string, Value any}`
-* `builder.WhereMoreEq{Table *Table, Column string, Value any}` `table_hash.col >= @value_hash`
-* `builder.WhereLessEq{Table *Table, Column string, Value any}`
+* `builder.WhereMore{Table *Table, Column string, Value interface{}}` `table_hash.col > @value_hash`
+* `builder.WhereLess{Table *Table, Column string, Value interface{}}`
+* `builder.WhereMoreEq{Table *Table, Column string, Value interface{}}` `table_hash.col >= @value_hash`
+* `builder.WhereLessEq{Table *Table, Column string, Value interface{}}`
 * `builder.WhereMoreColumn{Table1 *Table, Table2 *Table, Column1 string, Column2 string}` `table1_hash.col1 = table2_hash.col2`
+* `builder.WhereILike{Table *Table, Column string, Value interface{}}` `table_hash.col ILIKE @value_hash`
 * `builder.WhereFullText{Table *Table, Column string, Value string, Language string}` `to_tsvector('language', table_hash.col) @@ plainto_tsquery(@value_hash)`
 * `builder.WhereAnd{List: []builder.Where{}}`
 * `builder.WhereOr{List: []builder.Where{}}`

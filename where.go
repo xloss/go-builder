@@ -190,6 +190,26 @@ func (w WhereMoreColumn) Gen(q query) (string, map[string]any, error) {
 	return w.Table1.Alias + "." + w.Column1 + " > " + w.Table2.Alias + "." + w.Column2, map[string]any{}, nil
 }
 
+type WhereILike struct {
+	Table  *Table
+	Column string
+	Value  interface{}
+}
+
+func (w WhereILike) Gen(q query) (string, map[string]any, error) {
+	if q == nil {
+		return "", nil, fmt.Errorf("query cannot be nil")
+	}
+
+	if !q.checkTable(w.Table) {
+		return "", nil, fmt.Errorf("table %s does not exist", w.Table.Name)
+	}
+
+	tag := w.Column + "_" + randStr()
+
+	return w.Table.Alias + "." + w.Column + " ILIKE @" + tag, map[string]any{tag: w.Value}, nil
+}
+
 type WhereFullText struct {
 	Table    *Table
 	Column   string
