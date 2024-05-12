@@ -1,7 +1,6 @@
 package builder
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -55,7 +54,7 @@ func (q *UpdateQuery) Where(w Where) *UpdateQuery {
 
 func (q *UpdateQuery) getSet() (string, error) {
 	if len(q.sets) == 0 {
-		return "", errors.New("no sets found")
+		return "", UpdateNoSets
 	}
 
 	s := " SET "
