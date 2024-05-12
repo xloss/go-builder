@@ -7,6 +7,7 @@ go get github.com/xloss/go-builder
 
 ## Usage
 ### Basic usage
+#### Insert
 ```go
 table1 := builder.NewTable("table1")
 table2 := builder.NewTable("table2")
@@ -29,6 +30,23 @@ fmt.Println(binds)
 // Output:
 // SELECT table1_pxaisxqdvb.id, table2_xftynvknii.col FROM table1 as table1_pxaisxqdvb LEFT JOIN table2 AS table2_xftynvknii ON table1_pxaisxqdvb.id = table2_xftynvknii.table_id WHERE table1_pxaisxqdvb.id = @id_ywfaoazuel ORDER BY table1_pxaisxqdvb.name DESC LIMIT @limit_jlhldzwuei OFFSET @offset_myzuqcgmdn
 // map[id_ywfaoazuel:1 limit_jlhldzwuei:10 offset_myzuqcgmdn:5]
+```
+#### Update
+```go
+table := builder.NewTable("table")
+
+q := builder.NewUpdate(table)
+q.Set(table, "col1", "value1")
+q.SetNow(table, "col2")
+q.Where(builder.WhereEq{Table: table, Column: "col3", Value: 5})
+
+sql, binds, err := q.Get()
+fmt.Println(sql)
+fmt.Println(binds)
+
+// Output:
+// UPDATE table AS table_kiykrrnhxf SET table_kiykrrnhxf.col1 = @col1_tolhdmocsn, table_kiykrrnhxf.col2 = NOW() WHERE table_kiykrrnhxf.col3 = @col3_tkdyhzjxqb
+// map[col1_tolhdmocsn:value1 col3_tkdyhzjxqb:5]
 ```
 
 ## Package in Development
@@ -91,5 +109,18 @@ builder.Order{Table *Table, Column string, Desc bool}
 ##### Limit
 `.Limit(limit int)`
 
-##### OFFSET
+##### Offset
 `.Offset(offset int)`
+#### UPDATE
+##### Init
+```go
+t := builder.NewTable("table")
+q := builder.NewUpdate(t)
+```
+
+##### Set
+`.Set(table *Table, column string, value any)` `table_hash.col = @value_hash`
+`.SetNow(table *Table, column string)` `table_hash.col = NOW()`
+
+##### Where
+[See](#where)

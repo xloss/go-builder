@@ -530,7 +530,7 @@ func TestSelectQuery_Get(t *testing.T) {
 	if len(binds) != 3 {
 		t.Errorf("binds should have 1 values")
 	}
-	fmt.Println(sql, binds)
+
 	var w, l, o string
 
 	for k, v := range binds {
