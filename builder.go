@@ -14,7 +14,6 @@ type column struct {
 }
 
 type set struct {
-	Table  *Table
 	Column string
 	Value  interface{}
 	Now    bool

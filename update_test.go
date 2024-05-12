@@ -45,13 +45,10 @@ func TestUpdateQuery_Set(t *testing.T) {
 	table := NewTable("table")
 
 	q := NewUpdate(table)
-	q.Set(table, "col1", "value1")
+	q.Set("col1", "value1")
 
 	if len(q.sets) != 1 {
 		t.Errorf("q.sets should have 1 set")
-	}
-	if q.sets[0].Table != table {
-		t.Errorf("Table should have table")
 	}
 	if q.sets[0].Column != "col1" {
 		t.Errorf("Column should have col1")
@@ -68,13 +65,10 @@ func TestUpdateQuery_SetNow(t *testing.T) {
 	table := NewTable("table")
 
 	q := NewUpdate(table)
-	q.SetNow(table, "col1")
+	q.SetNow("col1")
 
 	if len(q.sets) != 1 {
 		t.Errorf("q.sets should have 1 set")
-	}
-	if q.sets[0].Table != table {
-		t.Errorf("Table should have table")
 	}
 	if q.sets[0].Column != "col1" {
 		t.Errorf("Column should have col1")
@@ -103,17 +97,15 @@ func TestUpdateQuery_Where(t *testing.T) {
 }
 
 func TestUpdateQuery_getSet(t *testing.T) {
-	table := NewTable("table")
-
-	q := NewUpdate(table)
+	q := NewUpdate(NewTable("table"))
 
 	sql, err := q.getSet()
 	if !errors.Is(UpdateNoSets, err) {
 		t.Errorf("q.getSet() returned %v", err)
 	}
 
-	q.Set(table, "col1", "value1")
-	q.SetNow(table, "col2")
+	q.Set("col1", "value1")
+	q.SetNow("col2")
 
 	sql, err = q.getSet()
 	if err != nil {
@@ -128,7 +120,7 @@ func TestUpdateQuery_getSet(t *testing.T) {
 		}
 	}
 
-	if sql != fmt.Sprintf(" SET %[1]s.col1 = @%[2]s, %[1]s.col2 = NOW()", table.Alias, tag) {
+	if sql != " SET col1 = @"+tag+", col2 = NOW()" {
 		t.Errorf("q.getSet() returned '%v'", sql)
 	}
 }
@@ -200,8 +192,8 @@ func TestUpdateQuery_Get(t *testing.T) {
 	table := NewTable("table")
 
 	q := NewUpdate(table)
-	q.Set(table, "col1", "value1")
-	q.SetNow(table, "col2")
+	q.Set("col1", "value1")
+	q.SetNow("col2")
 	q.Where(WhereEq{Table: table, Column: "col3", Value: 5})
 
 	sql, binds, err := q.Get()
@@ -222,7 +214,7 @@ func TestUpdateQuery_Get(t *testing.T) {
 		}
 	}
 
-	st := fmt.Sprintf("UPDATE %[1]s AS %[2]s SET %[2]s.col1 = @%[3]s, %[2]s.col2 = NOW() WHERE %[2]s.col3 = @%[4]s", table.Name, table.Alias, val, where)
+	st := fmt.Sprintf("UPDATE %[1]s AS %[2]s SET col1 = @%[3]s, col2 = NOW() WHERE %[2]s.col3 = @%[4]s", table.Name, table.Alias, val, where)
 	if sql != st {
 		t.Errorf("bad returned sql. return:\n'%s'\n'%s'", sql, st)
 	}

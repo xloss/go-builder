@@ -36,8 +36,8 @@ fmt.Println(binds)
 table := builder.NewTable("table")
 
 q := builder.NewUpdate(table)
-q.Set(table, "col1", "value1")
-q.SetNow(table, "col2")
+q.Set("col1", "value1")
+q.SetNow("col2")
 q.Where(builder.WhereEq{Table: table, Column: "col3", Value: 5})
 
 sql, binds, err := q.Get()
@@ -45,7 +45,7 @@ fmt.Println(sql)
 fmt.Println(binds)
 
 // Output:
-// UPDATE table AS table_kiykrrnhxf SET table_kiykrrnhxf.col1 = @col1_tolhdmocsn, table_kiykrrnhxf.col2 = NOW() WHERE table_kiykrrnhxf.col3 = @col3_tkdyhzjxqb
+// UPDATE table AS table_kiykrrnhxf SET col1 = @col1_tolhdmocsn, col2 = NOW() WHERE table_kiykrrnhxf.col3 = @col3_tkdyhzjxqb
 // map[col1_tolhdmocsn:value1 col3_tkdyhzjxqb:5]
 ```
 
@@ -119,8 +119,8 @@ q := builder.NewUpdate(t)
 ```
 
 ##### Set
-* `.Set(table *Table, column string, value any)` `table_hash.col = @value_hash`
-* `.SetNow(table *Table, column string)` `table_hash.col = NOW()`
+* `.Set(column string, value any)` `table_hash.col = @value_hash`
+* `.SetNow(column string)` `table_hash.col = NOW()`
 
 ##### Where
 [See](#where)

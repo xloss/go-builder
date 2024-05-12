@@ -26,9 +26,8 @@ func (q *UpdateQuery) addBind(key string, value any) {
 	q.binds[key] = value
 }
 
-func (q *UpdateQuery) Set(table *Table, column string, value any) *UpdateQuery {
+func (q *UpdateQuery) Set(column string, value any) *UpdateQuery {
 	q.sets = append(q.sets, set{
-		Table:  table,
 		Value:  value,
 		Column: column,
 	})
@@ -36,9 +35,8 @@ func (q *UpdateQuery) Set(table *Table, column string, value any) *UpdateQuery {
 	return q
 }
 
-func (q *UpdateQuery) SetNow(table *Table, column string) *UpdateQuery {
+func (q *UpdateQuery) SetNow(column string) *UpdateQuery {
 	q.sets = append(q.sets, set{
-		Table:  table,
 		Column: column,
 		Now:    true,
 	})
@@ -60,7 +58,7 @@ func (q *UpdateQuery) getSet() (string, error) {
 	s := " SET "
 
 	for i, st := range q.sets {
-		s += st.Table.Alias + "." + st.Column + " = "
+		s += st.Column + " = "
 
 		if st.Now {
 			s += "NOW()"
