@@ -91,3 +91,32 @@ func (c ColumnCoalesce) gen(q query) (string, error) {
 
 	return "COALESCE(" + c.Table.Alias + "." + c.Name + ", " + d + ") AS " + c.Alias, nil
 }
+
+type ColumnJsonbArrayElementsText struct {
+	Table    *Table
+	Name     string
+	Alias    string
+	Distinct bool
+}
+
+func (c ColumnJsonbArrayElementsText) gen(q query) (string, error) {
+	if !q.checkTable(c.Table) {
+		return "", fmt.Errorf("table %s is not exist", c.Table)
+	}
+
+	if c.Name == "" {
+		return "", fmt.Errorf("name is empty")
+	}
+
+	if c.Alias == "" {
+		return "", fmt.Errorf("alias is empty")
+	}
+
+	s := ""
+
+	if c.Distinct {
+		s += "DISTINCT "
+	}
+
+	return s + "JSONB_ARRAY_ELEMENTS_TEXT(" + c.Table.Alias + "." + c.Name + ") AS " + c.Alias, nil
+}

@@ -112,3 +112,54 @@ func TestColumnCoalesce_gen(t *testing.T) {
 		t.Fatal(sql)
 	}
 }
+
+func TestColumnJsonbArrayElementsText_gen(t *testing.T) {
+	table := NewTable("table")
+	q := NewSelect().From(table)
+	q.From(table)
+
+	c := ColumnJsonbArrayElementsText{Name: "col", Alias: "a"}
+
+	_, err := c.gen(q)
+	if err == nil {
+		t.Error("expected error")
+	}
+
+	c.Table = table
+	c.Name = ""
+
+	_, err = c.gen(q)
+	if err == nil {
+		t.Error("expected error")
+	}
+
+	c.Name = "col"
+	c.Alias = ""
+
+	_, err = c.gen(q)
+	if err == nil {
+		t.Error("expected error")
+	}
+
+	c.Alias = "a1"
+
+	sql, err := c.gen(q)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if sql != "JSONB_ARRAY_ELEMENTS_TEXT("+table.Alias+"."+c.Name+") AS "+c.Alias {
+		t.Fatal(sql)
+	}
+
+	c.Distinct = true
+
+	sql, err = c.gen(q)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if sql != "DISTINCT JSONB_ARRAY_ELEMENTS_TEXT("+table.Alias+"."+c.Name+") AS "+c.Alias {
+		t.Fatal(sql)
+	}
+}
