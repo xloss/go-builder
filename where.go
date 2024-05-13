@@ -298,3 +298,23 @@ func (w WhereOr) gen(q query) (string, map[string]any, error) {
 
 	return "(" + strings.Join(list, " OR ") + ")", binds, nil
 }
+
+type WhereJsonbTextExist struct {
+	Table  *Table
+	Column string
+	Value  string
+}
+
+func (w WhereJsonbTextExist) gen(q query) (string, map[string]any, error) {
+	if q == nil {
+		return "", nil, fmt.Errorf("query cannot be nil")
+	}
+
+	if !q.checkTable(w.Table) {
+		return "", nil, fmt.Errorf("table %s does not exist", w.Table.Name)
+	}
+
+	tag := w.Column + "_" + randStr()
+
+	return w.Table.Alias + "." + w.Column + " ? @" + tag, map[string]any{tag: w.Value}, nil
+}
