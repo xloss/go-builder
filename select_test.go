@@ -325,7 +325,7 @@ func TestSelectQuery_getOrder(t *testing.T) {
 		t.Errorf("bad returned select. return %s", order)
 	}
 
-	q.Order(Order{Table: table, Column: "col2", Desc: true})
+	q.Order(Order{Column: "col2", Desc: true})
 
 	if len(q.order) != 2 {
 		t.Errorf("q.order should have 1 values")
@@ -335,7 +335,7 @@ func TestSelectQuery_getOrder(t *testing.T) {
 	if err != nil {
 		t.Errorf("q.getOrder should not have returned error. return: %e", err)
 	}
-	if order != " ORDER BY "+table.Alias+".col1, "+table.Alias+".col2 DESC" {
+	if order != " ORDER BY "+table.Alias+".col1, col2 DESC" {
 		t.Errorf("bad returned order. return %s", order)
 	}
 }

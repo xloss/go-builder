@@ -169,11 +169,15 @@ func (q *SelectQuery) getOrder() (string, error) {
 	s := " ORDER BY "
 
 	for i, o := range q.order {
-		if !q.checkTable(o.Table) {
-			return "", fmt.Errorf("table %s is not exist", o.Table)
+		if o.Table != nil {
+			if !q.checkTable(o.Table) {
+				return "", fmt.Errorf("table %s is not exist", o.Table)
+			}
+
+			s += o.Table.Alias + "."
 		}
 
-		s += o.Table.Alias + "." + o.Column
+		s += o.Column
 
 		if o.Desc {
 			s += " DESC"
