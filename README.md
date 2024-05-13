@@ -48,7 +48,7 @@ fmt.Println(binds)
 // UPDATE table AS table_kiykrrnhxf SET col1 = @col1_tolhdmocsn, col2 = NOW() WHERE table_kiykrrnhxf.col3 = @col3_tkdyhzjxqb
 // map[col1_tolhdmocsn:value1 col3_tkdyhzjxqb:5]
 ```
-#### INSERT
+#### Insert
 ```go
 table := NewTable("table")
 q := NewInsert(table)
@@ -64,6 +64,29 @@ sql, binds, err := q.Get()
 // Output:
 // INSERT INTO table AS table_jhpjqkzvkd (col1, col2) VALUES (@col1_buaonudjkx, @col2_amouztvkkt) RETURNING table_jhpjqkzvkd.col1, table_jhpjqkzvkd.col2 as a1
 // map[col1_buaonudjkx:5 col2_amouztvkkt:str]
+```
+#### Delete
+```go
+table := NewTable("table")
+q := NewDelete(table)
+
+q.Where(WhereEq{Table: table, Column: "col", Value: 5})
+
+sql, binds, err := q.Get()
+// Output:
+// DELETE FROM table AS table_iuulmrhwnt WHERE table_iuulmrhwnt.col = @col_ujpmtrhymk
+// map[col_ujpmtrhymk:5]
+
+// Without WHERE
+table := NewTable("table")
+q := NewDelete(table)
+
+q.Full()
+
+sql, binds, err := q.Get()
+// Output:
+// DELETE FROM table AS table_iuulmrhwnt
+// map[]
 ```
 
 ## Package in Development
@@ -128,6 +151,7 @@ builder.Order{Table *Table, Column string, Desc bool}
 
 ##### Offset
 `.Offset(offset int)`
+
 #### UPDATE
 ##### Init
 ```go
@@ -148,10 +172,21 @@ q := builder.NewUpdate(t)
 t := builder.NewTable("table")
 q := builder.NewInsert(t)
 ```
-
-#### Values
+##### Values
 `.Value(name string, value any)`
 
-#### Returning
+##### Returning
 * `.Column(table *Table, name string)` - `RETURNING table_hash.col`
 * `.ColumnAlias(table *Table, name string, alias string)` - `RETURNING table_hash.col as alias`
+
+#### DELETE
+##### Init
+```go
+t := builder.NewTable("table")
+q := builder.NewDelete(t)
+```
+##### Where
+[See](#where)
+
+##### Protection against complete cleaning
+Without a WHERE block, function `.Get()` will throw an error. You need to call function `.Full()` to generate sql without a WHERE block.
