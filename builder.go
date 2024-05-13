@@ -19,6 +19,11 @@ type set struct {
 	Now    bool
 }
 
+type insertValue struct {
+	Column string
+	Value  interface{}
+}
+
 type Order struct {
 	Table  *Table
 	Column string

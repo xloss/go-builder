@@ -48,6 +48,23 @@ fmt.Println(binds)
 // UPDATE table AS table_kiykrrnhxf SET col1 = @col1_tolhdmocsn, col2 = NOW() WHERE table_kiykrrnhxf.col3 = @col3_tkdyhzjxqb
 // map[col1_tolhdmocsn:value1 col3_tkdyhzjxqb:5]
 ```
+#### INSERT
+```go
+table := NewTable("table")
+q := NewInsert(table)
+
+q.Value("col1", 5)
+q.Value("col2", "str")
+
+q.Column(table, "col1")
+q.ColumnAlias(table, "col2", "a1")
+
+sql, binds, err := q.Get()
+
+// Output:
+// INSERT INTO table AS table_jhpjqkzvkd (col1, col2) VALUES (@col1_buaonudjkx, @col2_amouztvkkt) RETURNING table_jhpjqkzvkd.col1, table_jhpjqkzvkd.col2 as a1
+// map[col1_buaonudjkx:5 col2_amouztvkkt:str]
+```
 
 ## Package in Development
 ### Available
@@ -86,17 +103,17 @@ q.From(table1, table2)
 .Where(where builder.Where)
 ```
 
-* `builder.WhereEq{Table *Table, Column string, Value interface{}}` `table_hash.col = @value_hash`
-* `builder.WhereIsNull{Table *Table, Column string}` `table_hash.col IS NULL`
-* `builder.WhereIsNotNull{Table *Table, Column string}` `table_hash.col IS NOT NULL`
-* `builder.WhereIn{Table *Table, Column string, Values interface{}}` `table_hash.col = ANY(@values_hash)`
-* `builder.WhereMore{Table *Table, Column string, Value interface{}}` `table_hash.col > @value_hash`
+* `builder.WhereEq{Table *Table, Column string, Value interface{}}` - `table_hash.col = @value_hash`
+* `builder.WhereIsNull{Table *Table, Column string}` - `table_hash.col IS NULL`
+* `builder.WhereIsNotNull{Table *Table, Column string}` - `table_hash.col IS NOT NULL`
+* `builder.WhereIn{Table *Table, Column string, Values interface{}}` - `table_hash.col = ANY(@values_hash)`
+* `builder.WhereMore{Table *Table, Column string, Value interface{}}` - `table_hash.col > @value_hash`
 * `builder.WhereLess{Table *Table, Column string, Value interface{}}`
-* `builder.WhereMoreEq{Table *Table, Column string, Value interface{}}` `table_hash.col >= @value_hash`
+* `builder.WhereMoreEq{Table *Table, Column string, Value interface{}}` - `table_hash.col >= @value_hash`
 * `builder.WhereLessEq{Table *Table, Column string, Value interface{}}`
-* `builder.WhereMoreColumn{Table1 *Table, Table2 *Table, Column1 string, Column2 string}` `table1_hash.col1 = table2_hash.col2`
-* `builder.WhereILike{Table *Table, Column string, Value interface{}}` `table_hash.col ILIKE @value_hash`
-* `builder.WhereFullText{Table *Table, Column string, Value string, Language string}` `to_tsvector('language', table_hash.col) @@ plainto_tsquery(@value_hash)`
+* `builder.WhereMoreColumn{Table1 *Table, Table2 *Table, Column1 string, Column2 string}` - `table1_hash.col1 = table2_hash.col2`
+* `builder.WhereILike{Table *Table, Column string, Value interface{}}` - `table_hash.col ILIKE @value_hash`
+* `builder.WhereFullText{Table *Table, Column string, Value string, Language string}` - `to_tsvector('language', table_hash.col) @@ plainto_tsquery(@value_hash)`
 * `builder.WhereAnd{List: []builder.Where{}}`
 * `builder.WhereOr{List: []builder.Where{}}`
 
@@ -124,3 +141,17 @@ q := builder.NewUpdate(t)
 
 ##### Where
 [See](#where)
+
+#### INSERT
+##### Init
+```go
+t := builder.NewTable("table")
+q := builder.NewInsert(t)
+```
+
+#### Values
+`.Value(name string, value any)`
+
+#### Returning
+* `.Column(table *Table, name string)` - `RETURNING table_hash.col`
+* `.ColumnAlias(table *Table, name string, alias string)` - `RETURNING table_hash.col as alias`
