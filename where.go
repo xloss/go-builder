@@ -6,7 +6,7 @@ import (
 )
 
 type Where interface {
-	Gen(q query) (string, map[string]any, error)
+	gen(q query) (string, map[string]any, error)
 }
 
 type WhereEq struct {
@@ -15,7 +15,7 @@ type WhereEq struct {
 	Value  interface{}
 }
 
-func (w WhereEq) Gen(q query) (string, map[string]any, error) {
+func (w WhereEq) gen(q query) (string, map[string]any, error) {
 	if q == nil {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
@@ -34,7 +34,7 @@ type WhereIsNull struct {
 	Column string
 }
 
-func (w WhereIsNull) Gen(q query) (string, map[string]any, error) {
+func (w WhereIsNull) gen(q query) (string, map[string]any, error) {
 	if q == nil {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
@@ -51,7 +51,7 @@ type WhereIsNotNull struct {
 	Column string
 }
 
-func (w WhereIsNotNull) Gen(q query) (string, map[string]any, error) {
+func (w WhereIsNotNull) gen(q query) (string, map[string]any, error) {
 	if q == nil {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
@@ -69,7 +69,7 @@ type WhereIn struct {
 	Values interface{}
 }
 
-func (w WhereIn) Gen(q query) (string, map[string]any, error) {
+func (w WhereIn) gen(q query) (string, map[string]any, error) {
 	if q == nil {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
@@ -89,7 +89,7 @@ type WhereMore struct {
 	Value  interface{}
 }
 
-func (w WhereMore) Gen(q query) (string, map[string]any, error) {
+func (w WhereMore) gen(q query) (string, map[string]any, error) {
 	if q == nil {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
@@ -109,7 +109,7 @@ type WhereLess struct {
 	Value  interface{}
 }
 
-func (w WhereLess) Gen(q query) (string, map[string]any, error) {
+func (w WhereLess) gen(q query) (string, map[string]any, error) {
 	if q == nil {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
@@ -131,7 +131,7 @@ type WhereMoreEq struct {
 	Value  interface{}
 }
 
-func (w WhereMoreEq) Gen(q query) (string, map[string]any, error) {
+func (w WhereMoreEq) gen(q query) (string, map[string]any, error) {
 	if q == nil {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
@@ -153,7 +153,7 @@ type WhereLessEq struct {
 	Value  interface{}
 }
 
-func (w WhereLessEq) Gen(q query) (string, map[string]any, error) {
+func (w WhereLessEq) gen(q query) (string, map[string]any, error) {
 	if q == nil {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
@@ -174,7 +174,7 @@ type WhereMoreColumn struct {
 	Column1, Column2 string
 }
 
-func (w WhereMoreColumn) Gen(q query) (string, map[string]any, error) {
+func (w WhereMoreColumn) gen(q query) (string, map[string]any, error) {
 	if q == nil {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
@@ -196,7 +196,7 @@ type WhereILike struct {
 	Value  interface{}
 }
 
-func (w WhereILike) Gen(q query) (string, map[string]any, error) {
+func (w WhereILike) gen(q query) (string, map[string]any, error) {
 	if q == nil {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
@@ -217,7 +217,7 @@ type WhereFullText struct {
 	Value    string
 }
 
-func (w WhereFullText) Gen(q query) (string, map[string]any, error) {
+func (w WhereFullText) gen(q query) (string, map[string]any, error) {
 	if q == nil {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
@@ -235,7 +235,7 @@ type WhereAnd struct {
 	List []Where
 }
 
-func (w WhereAnd) Gen(q query) (string, map[string]any, error) {
+func (w WhereAnd) gen(q query) (string, map[string]any, error) {
 	if q == nil {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
@@ -250,7 +250,7 @@ func (w WhereAnd) Gen(q query) (string, map[string]any, error) {
 	)
 
 	for i, where := range w.List {
-		sql, bind, err := where.Gen(q)
+		sql, bind, err := where.gen(q)
 		if err != nil {
 			return "", nil, err
 		}
@@ -269,7 +269,7 @@ type WhereOr struct {
 	List []Where
 }
 
-func (w WhereOr) Gen(q query) (string, map[string]any, error) {
+func (w WhereOr) gen(q query) (string, map[string]any, error) {
 	if q == nil {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
@@ -284,7 +284,7 @@ func (w WhereOr) Gen(q query) (string, map[string]any, error) {
 	)
 
 	for i, where := range w.List {
-		sql, bind, err := where.Gen(q)
+		sql, bind, err := where.gen(q)
 		if err != nil {
 			return "", nil, err
 		}

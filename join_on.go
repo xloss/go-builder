@@ -6,14 +6,14 @@ import (
 )
 
 type On interface {
-	Gen(query query) (string, error)
+	gen(query query) (string, error)
 }
 
 type OnAnd struct {
 	List []On
 }
 
-func (o OnAnd) Gen(q query) (string, error) {
+func (o OnAnd) gen(q query) (string, error) {
 	if q == nil {
 		return "", fmt.Errorf("query cannot be nil")
 	}
@@ -25,7 +25,7 @@ func (o OnAnd) Gen(q query) (string, error) {
 	list := make([]string, len(o.List))
 
 	for i, on := range o.List {
-		sql, err := on.Gen(q)
+		sql, err := on.gen(q)
 		if err != nil {
 			return "", err
 		}
@@ -43,7 +43,7 @@ type OnEq struct {
 	Column2 string
 }
 
-func (o OnEq) Gen(q query) (string, error) {
+func (o OnEq) gen(q query) (string, error) {
 	if q == nil {
 		return "", fmt.Errorf("query cannot be nil")
 	}
@@ -66,7 +66,7 @@ type OnLess struct {
 	Column2 string
 }
 
-func (o OnLess) Gen(q query) (string, error) {
+func (o OnLess) gen(q query) (string, error) {
 	if q == nil {
 		return "", fmt.Errorf("query cannot be nil")
 	}
@@ -89,7 +89,7 @@ type OnMore struct {
 	Column2 string
 }
 
-func (o OnMore) Gen(q query) (string, error) {
+func (o OnMore) gen(q query) (string, error) {
 	if q == nil {
 		return "", fmt.Errorf("query cannot be nil")
 	}

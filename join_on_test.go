@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestOnEq_Gen(t *testing.T) {
+func TestOnEq_gen(t *testing.T) {
 	table1 := NewTable("table1")
 	table2 := NewTable("table2")
 
@@ -20,7 +20,7 @@ func TestOnEq_Gen(t *testing.T) {
 		Column2: "table_id",
 	}
 
-	sql, err := on.Gen(q)
+	sql, err := on.gen(q)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -29,7 +29,7 @@ func TestOnEq_Gen(t *testing.T) {
 	}
 }
 
-func TestOnMore_Gen(t *testing.T) {
+func TestOnMore_gen(t *testing.T) {
 	table1 := NewTable("table1")
 	table2 := NewTable("table2")
 
@@ -44,7 +44,7 @@ func TestOnMore_Gen(t *testing.T) {
 		Column2: "table_id",
 	}
 
-	sql, err := on.Gen(q)
+	sql, err := on.gen(q)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -53,7 +53,7 @@ func TestOnMore_Gen(t *testing.T) {
 	}
 }
 
-func TestOnLess_Gen(t *testing.T) {
+func TestOnLess_gen(t *testing.T) {
 	table1 := NewTable("table1")
 	table2 := NewTable("table2")
 
@@ -68,7 +68,7 @@ func TestOnLess_Gen(t *testing.T) {
 		Column2: "table_id",
 	}
 
-	sql, err := on.Gen(q)
+	sql, err := on.gen(q)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,7 +77,7 @@ func TestOnLess_Gen(t *testing.T) {
 	}
 }
 
-func TestOnAnd_Gen(t *testing.T) {
+func TestOnAnd_gen(t *testing.T) {
 	table1 := NewTable("table1")
 	table2 := NewTable("table2")
 
@@ -102,7 +102,7 @@ func TestOnAnd_Gen(t *testing.T) {
 		},
 	}
 
-	sql, err := on.Gen(q)
+	sql, err := on.gen(q)
 	if err != nil {
 		t.Fatal(err)
 	}

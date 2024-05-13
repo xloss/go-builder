@@ -181,7 +181,7 @@ func (q *SelectQuery) getWhere() (string, error) {
 		return "", nil
 	}
 
-	where, binds, err := q.where.Gen(q)
+	where, binds, err := q.where.gen(q)
 	if err != nil {
 		return "", err
 	}

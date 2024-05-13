@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestWhereEq_Gen(t *testing.T) {
+func TestWhereEq_gen(t *testing.T) {
 	table := NewTable("table")
 	q := NewSelect()
 	q.From(table)
@@ -15,7 +15,7 @@ func TestWhereEq_Gen(t *testing.T) {
 		Value:  "value",
 	}
 
-	sql, binds, err := where.Gen(q)
+	sql, binds, err := where.gen(q)
 	if err != nil {
 		t.Error(err)
 	}
@@ -41,7 +41,7 @@ func TestWhereEq_Gen(t *testing.T) {
 	}
 }
 
-func TestWhereIsNull_Gen(t *testing.T) {
+func TestWhereIsNull_gen(t *testing.T) {
 	table := NewTable("table")
 	q := NewSelect()
 	q.From(table)
@@ -51,7 +51,7 @@ func TestWhereIsNull_Gen(t *testing.T) {
 		Column: "col",
 	}
 
-	sql, binds, err := where.Gen(q)
+	sql, binds, err := where.gen(q)
 	if err != nil {
 		t.Error(err)
 	}
@@ -65,7 +65,7 @@ func TestWhereIsNull_Gen(t *testing.T) {
 	}
 }
 
-func TestWhereIsNotNull_Gen(t *testing.T) {
+func TestWhereIsNotNull_gen(t *testing.T) {
 	table := NewTable("table")
 	q := NewSelect()
 	q.From(table)
@@ -75,7 +75,7 @@ func TestWhereIsNotNull_Gen(t *testing.T) {
 		Column: "col",
 	}
 
-	sql, binds, err := where.Gen(q)
+	sql, binds, err := where.gen(q)
 	if err != nil {
 		t.Error(err)
 	}
@@ -89,7 +89,7 @@ func TestWhereIsNotNull_Gen(t *testing.T) {
 	}
 }
 
-func TestWhereIn_Gen(t *testing.T) {
+func TestWhereIn_gen(t *testing.T) {
 	table := NewTable("table")
 	q := NewSelect()
 	q.From(table)
@@ -102,7 +102,7 @@ func TestWhereIn_Gen(t *testing.T) {
 		},
 	}
 
-	sql, binds, err := where.Gen(q)
+	sql, binds, err := where.gen(q)
 	if err != nil {
 		t.Error(err)
 	}
@@ -133,7 +133,7 @@ func TestWhereIn_Gen(t *testing.T) {
 	}
 }
 
-func TestWhereMore_Gen(t *testing.T) {
+func TestWhereMore_gen(t *testing.T) {
 	table := NewTable("table")
 	q := NewSelect()
 	q.From(table)
@@ -144,7 +144,7 @@ func TestWhereMore_Gen(t *testing.T) {
 		Value:  "value",
 	}
 
-	sql, binds, err := where.Gen(q)
+	sql, binds, err := where.gen(q)
 	if err != nil {
 		t.Error(err)
 	}
@@ -170,7 +170,7 @@ func TestWhereMore_Gen(t *testing.T) {
 	}
 }
 
-func TestWhereLess_Gen(t *testing.T) {
+func TestWhereLess_gen(t *testing.T) {
 	table := NewTable("table")
 	q := NewSelect()
 	q.From(table)
@@ -181,7 +181,7 @@ func TestWhereLess_Gen(t *testing.T) {
 		Value:  "value",
 	}
 
-	sql, binds, err := where.Gen(q)
+	sql, binds, err := where.gen(q)
 	if err != nil {
 		t.Error(err)
 	}
@@ -207,7 +207,7 @@ func TestWhereLess_Gen(t *testing.T) {
 	}
 }
 
-func TestWhereMoreEq_Gen(t *testing.T) {
+func TestWhereMoreEq_gen(t *testing.T) {
 	table := NewTable("table")
 	q := NewSelect()
 	q.From(table)
@@ -218,7 +218,7 @@ func TestWhereMoreEq_Gen(t *testing.T) {
 		Value:  "value",
 	}
 
-	sql, binds, err := where.Gen(q)
+	sql, binds, err := where.gen(q)
 	if err != nil {
 		t.Error(err)
 	}
@@ -244,7 +244,7 @@ func TestWhereMoreEq_Gen(t *testing.T) {
 	}
 }
 
-func TestWhereLessEq_Gen(t *testing.T) {
+func TestWhereLessEq_gen(t *testing.T) {
 	table := NewTable("table")
 	q := NewSelect()
 	q.From(table)
@@ -255,7 +255,7 @@ func TestWhereLessEq_Gen(t *testing.T) {
 		Value:  "value",
 	}
 
-	sql, binds, err := where.Gen(q)
+	sql, binds, err := where.gen(q)
 	if err != nil {
 		t.Error(err)
 	}
@@ -281,7 +281,7 @@ func TestWhereLessEq_Gen(t *testing.T) {
 	}
 }
 
-func TestWhereMoreColumn_Gen(t *testing.T) {
+func TestWhereMoreColumn_gen(t *testing.T) {
 	table1 := NewTable("table1")
 	table2 := NewTable("table2")
 
@@ -296,7 +296,7 @@ func TestWhereMoreColumn_Gen(t *testing.T) {
 		Column2: "col2",
 	}
 
-	sql, binds, err := where.Gen(q)
+	sql, binds, err := where.gen(q)
 	if err != nil {
 		t.Error(err)
 	}
@@ -310,7 +310,7 @@ func TestWhereMoreColumn_Gen(t *testing.T) {
 	}
 }
 
-func TestWhereILike_Gen(t *testing.T) {
+func TestWhereILike_gen(t *testing.T) {
 	table := NewTable("table")
 	q := NewSelect()
 	q.From(table)
@@ -321,7 +321,7 @@ func TestWhereILike_Gen(t *testing.T) {
 		Value:  "value",
 	}
 
-	sql, binds, err := where.Gen(q)
+	sql, binds, err := where.gen(q)
 	if err != nil {
 		t.Error(err)
 	}
@@ -347,7 +347,7 @@ func TestWhereILike_Gen(t *testing.T) {
 	}
 }
 
-func TestWhereFullText_Gen(t *testing.T) {
+func TestWhereFullText_gen(t *testing.T) {
 	table := NewTable("table")
 	q := NewSelect()
 	q.From(table)
@@ -359,7 +359,7 @@ func TestWhereFullText_Gen(t *testing.T) {
 		Value:    "value",
 	}
 
-	sql, binds, err := where.Gen(q)
+	sql, binds, err := where.gen(q)
 	if err != nil {
 		t.Error(err)
 	}
@@ -385,7 +385,7 @@ func TestWhereFullText_Gen(t *testing.T) {
 	}
 }
 
-func TestWhereAnd_Gen(t *testing.T) {
+func TestWhereAnd_gen(t *testing.T) {
 	table := NewTable("table")
 	q := NewSelect()
 	q.From(table)
@@ -405,7 +405,7 @@ func TestWhereAnd_Gen(t *testing.T) {
 		},
 	}
 
-	sql, binds, err := where.Gen(q)
+	sql, binds, err := where.gen(q)
 	if err != nil {
 		t.Error(err)
 	}
@@ -431,7 +431,7 @@ func TestWhereAnd_Gen(t *testing.T) {
 	}
 }
 
-func TestWhereOr_Gen(t *testing.T) {
+func TestWhereOr_gen(t *testing.T) {
 	table := NewTable("table")
 	q := NewSelect()
 	q.From(table)
@@ -451,7 +451,7 @@ func TestWhereOr_Gen(t *testing.T) {
 		},
 	}
 
-	sql, binds, err := where.Gen(q)
+	sql, binds, err := where.gen(q)
 	if err != nil {
 		t.Error(err)
 	}

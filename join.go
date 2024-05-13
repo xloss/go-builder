@@ -8,7 +8,7 @@ type join struct {
 }
 
 func (j join) Gen(query query) (string, error) {
-	on, err := j.On.Gen(query)
+	on, err := j.On.gen(query)
 	if err != nil {
 		return "", err
 	}
