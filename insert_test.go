@@ -64,54 +64,15 @@ func TestInsertQuery_Value(t *testing.T) {
 	}
 }
 
-func TestInsertQuery_Column(t *testing.T) {
+func TestInsertQuery_Return(t *testing.T) {
 	table := NewTable("table")
 	q := NewInsert(table)
 
-	q.Column(table, "col1")
-	q.ColumnAlias(table, "col2", "a1")
+	q.Return(ColumnName{Table: table, Name: "col1"})
+	q.Return(ColumnName{Table: table, Name: "col2", Alias: "a1"})
 
-	if len(q.columns) != 2 {
+	if len(q.returns) != 2 {
 		t.Errorf("q.values should have 2 values")
-	}
-	if q.columns[0].Table != table {
-		t.Errorf("q.columns[0].Table should have table")
-	}
-	if q.columns[0].Name != "col1" {
-		t.Errorf("q.columns[0].Name should have col1")
-	}
-	if q.columns[1].Table != table {
-		t.Errorf("q.columns[1].Table should have table")
-	}
-	if q.columns[1].Name != "col2" {
-		t.Errorf("q.columns[1].Name should have col2")
-	}
-	if q.columns[1].Alias != "a1" {
-		t.Errorf("q.columns[1].Alias should have a1")
-	}
-}
-
-func TestInsertQuery_ColumnAlias(t *testing.T) {
-	table := NewTable("table")
-	q := NewInsert(table)
-
-	q.ColumnAlias(table, "name", "desc")
-
-	if len(q.columns) != 1 {
-		t.Errorf("q.columns should have 1 column")
-	}
-
-	if q.columns[0].Name != "name" {
-		t.Errorf("q.columns[0].Name should have name string")
-	}
-	if q.columns[0].Table != table {
-		t.Errorf("q.columns[0].Table should have table %v", table)
-	}
-	if q.columns[0].Alias != "desc" {
-		t.Errorf("q.columns[0].Alias should have desc string")
-	}
-	if q.columns[0].Aggregate != false {
-		t.Errorf("q.columns[0].Aggregate should have false")
 	}
 }
 
@@ -146,12 +107,22 @@ func TestInsertQuery_getReturns(t *testing.T) {
 	table := NewTable("table")
 	q := NewInsert(table)
 
-	q.Column(table, "col1")
-	q.ColumnAlias(table, "col2", "a1")
+	returns, err := q.getReturns()
+	if err != nil {
+		t.Errorf("q.getReturns() returned %v", err)
+	}
+	if returns != "" {
+		t.Errorf("q.getReturns() returned %v", returns)
+	}
 
-	returns := q.getReturns()
+	q.Return(ColumnName{Table: table, Name: "col1"})
+	q.Return(ColumnName{Table: table, Name: "col2", Alias: "a1"})
 
-	if returns != " RETURNING "+table.Alias+".col1, "+table.Alias+".col2 as a1" {
+	returns, err = q.getReturns()
+	if err != nil {
+		t.Errorf("q.getReturns() returned %v", err)
+	}
+	if returns != " RETURNING "+table.Alias+".col1, "+table.Alias+".col2 AS a1" {
 		t.Errorf("q.getReturns() returned '%v'", returns)
 	}
 }
@@ -163,8 +134,8 @@ func TestInsertQuery_Get(t *testing.T) {
 	q.Value("col1", 5)
 	q.Value("col2", "str")
 
-	q.Column(table, "col1")
-	q.ColumnAlias(table, "col2", "a1")
+	q.Return(ColumnName{Table: table, Name: "col1"})
+	q.Return(ColumnName{Table: table, Name: "col2", Alias: "a1"})
 
 	sql, binds, err := q.Get()
 	if err != nil {
@@ -185,7 +156,7 @@ func TestInsertQuery_Get(t *testing.T) {
 		t.Errorf("q.Get() should have 2 values")
 	}
 
-	if sql != fmt.Sprintf("INSERT INTO %[1]s AS %[2]s (col1, col2) VALUES (@%[3]s, @%[4]s) RETURNING %[2]s.col1, %[2]s.col2 as a1", table.Name, table.Alias, tag1, tag2) {
+	if sql != fmt.Sprintf("INSERT INTO %[1]s AS %[2]s (col1, col2) VALUES (@%[3]s, @%[4]s) RETURNING %[2]s.col1, %[2]s.col2 AS a1", table.Name, table.Alias, tag1, tag2) {
 		t.Errorf("q.Get() returned '%v'", sql)
 	}
 }

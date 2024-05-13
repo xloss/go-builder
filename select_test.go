@@ -60,136 +60,11 @@ func TestSelectQuery_Column(t *testing.T) {
 	table := NewTable("table")
 	q := NewSelect()
 
-	q.Column(table, "name")
-	q.Column(table, "desc")
+	q.Column(ColumnName{Table: table, Name: "col1"})
+	q.Column(ColumnName{Table: table, Name: "col2"})
 
 	if len(q.columns) != 2 {
 		t.Errorf("q.columns should have 2 column")
-	}
-
-	if q.columns[0].Name != "name" {
-		t.Errorf("q.columns[0].Name should have name string")
-	}
-	if q.columns[0].Table != table {
-		t.Errorf("q.columns[0].Table should have table %v", table)
-	}
-	if q.columns[0].Alias != "" {
-		t.Errorf("q.columns[0].Alias should have empty string")
-	}
-	if q.columns[0].Aggregate != false {
-		t.Errorf("q.columns[0].Aggregate should have false")
-	}
-
-	if q.columns[1].Name != "desc" {
-		t.Errorf("q.columns[1].Name should have desc string")
-	}
-	if q.columns[1].Table != table {
-		t.Errorf("q.columns[1].Table should have table %v", table)
-	}
-	if q.columns[1].Alias != "" {
-		t.Errorf("q.columns[1].Alias should have empty string")
-	}
-	if q.columns[1].Aggregate != false {
-		t.Errorf("q.columns[1].Aggregate should have false")
-	}
-}
-
-func TestSelectQuery_ColumnAlias(t *testing.T) {
-	table := NewTable("table")
-	q := NewSelect()
-
-	q.ColumnAlias(table, "name", "desc")
-
-	if len(q.columns) != 1 {
-		t.Errorf("q.columns should have 1 column")
-	}
-
-	if q.columns[0].Name != "name" {
-		t.Errorf("q.columns[0].Name should have name string")
-	}
-	if q.columns[0].Table != table {
-		t.Errorf("q.columns[0].Table should have table %v", table)
-	}
-	if q.columns[0].Alias != "desc" {
-		t.Errorf("q.columns[0].Alias should have desc string")
-	}
-	if q.columns[0].Aggregate != false {
-		t.Errorf("q.columns[0].Aggregate should have false")
-	}
-}
-
-func TestSelectQuery_ColumnCount(t *testing.T) {
-	table := NewTable("table")
-	q := NewSelect()
-
-	q.ColumnCount(table, "len")
-
-	if len(q.columns) != 1 {
-		t.Errorf("q.columns should have 1 column")
-	}
-	if q.columns[0].Name != "COUNT(*)" {
-		t.Errorf("q.columns[0].Name should have COUNT(*) string")
-	}
-	if q.columns[0].Table != table {
-		t.Errorf("q.columns[0].Table should have table %v", table)
-	}
-	if q.columns[0].Alias != "len" {
-		t.Errorf("q.columns[0].Alias should have len string")
-	}
-	if q.columns[0].Aggregate != true {
-		t.Errorf("q.columns[0].Aggregate should have true")
-	}
-}
-
-func TestSelectQuery_ColumnCoalesce(t *testing.T) {
-	table := NewTable("table")
-	q := NewSelect()
-
-	q.ColumnCoalesce(table, "col_1", "c1", 10)
-	q.ColumnCoalesce(table, "col_2", "c2", 10.5)
-	q.ColumnCoalesce(table, "col_3", "c3", "e")
-
-	if len(q.columns) != 3 {
-		t.Errorf("q.columns should have 4 columns")
-	}
-
-	if q.columns[0].Name != fmt.Sprintf(`COALESCE(%s.%s, %s)`, table.Alias, "col_1", "10") {
-		t.Errorf("q.columns[0].Name should have COALESCE(%s.%s, %s)", table.Alias, "col_1", "10")
-	}
-	if q.columns[0].Table != table {
-		t.Errorf("q.columns[0].Table should have table %v", table)
-	}
-	if q.columns[0].Alias != "c1" {
-		t.Errorf("q.columns[0].Alias should have c1")
-	}
-	if q.columns[0].Aggregate != true {
-		t.Errorf("q.columns[0].Aggregate should have true")
-	}
-
-	if q.columns[1].Name != fmt.Sprintf(`COALESCE(%s.%s, %s)`, table.Alias, "col_2", "10.5") {
-		t.Errorf("q.columns[1].Name should have COALESCE(%s.%s, %s)", table.Alias, "col_2", "10.5")
-	}
-	if q.columns[1].Table != table {
-		t.Errorf("q.columns[1].Table should have table %v", table)
-	}
-	if q.columns[1].Alias != "c2" {
-		t.Errorf("q.columns[1].Alias should have c2")
-	}
-	if q.columns[1].Aggregate != true {
-		t.Errorf("q.columns[1].Aggregate should have true")
-	}
-
-	if q.columns[2].Name != fmt.Sprintf(`COALESCE(%s.%s, %s)`, table.Alias, "col_3", "'e'") {
-		t.Errorf("q.columns[1].Name should have COALESCE(%s.%s, %s)", table.Alias, "col_3", "'e'")
-	}
-	if q.columns[2].Table != table {
-		t.Errorf("q.columns[2].Table should have table %v", table)
-	}
-	if q.columns[2].Alias != "c3" {
-		t.Errorf("q.columns[2].Alias should have c3")
-	}
-	if q.columns[2].Aggregate != true {
-		t.Errorf("q.columns[2].Aggregate should have true")
 	}
 }
 
@@ -199,7 +74,7 @@ func TestSelectQuery_LeftJoin(t *testing.T) {
 
 	q := NewSelect()
 	q.From(table1)
-	q.Column(table2, "col")
+	q.Column(ColumnName{Table: table2, Name: "col"})
 	q.LeftJoin(table2, OnEq{
 		Table1:  table1,
 		Table2:  table2,
@@ -323,16 +198,14 @@ func TestSelectQuery_getSelect(t *testing.T) {
 		t.Errorf("q.getSelect should have error")
 	}
 
-	q.Column(table1, "col1")
-	q.ColumnAlias(table2, "col2", "alias1")
-	q.ColumnCount(table1, "alias2")
-	q.ColumnCoalesce(table2, "col3", "alias3", 10)
+	q.Column(ColumnName{Table: table1, Name: "col1"})
+	q.Column(ColumnCoalesce{Table: table2, Name: "col2", Alias: "a1", Default: 10})
 
 	s, err := q.getSelect()
 	if err != nil {
 		t.Errorf("q.getSelect should not have returned error. return: %e", err)
 	}
-	if s != fmt.Sprintf("SELECT %[1]s.col1, %[2]s.col2 as alias1, COUNT(*) as alias2, COALESCE(%[2]s.col3, 10) as alias3", table1.Alias, table2.Alias) {
+	if s != fmt.Sprintf("SELECT %[1]s.col1, COALESCE(%[2]s.col2, 10) AS a1", table1.Alias, table2.Alias) {
 		t.Errorf("bad returned select. return %s", s)
 	}
 }
@@ -485,7 +358,7 @@ func TestSelectQuery_getJoin(t *testing.T) {
 		t.Errorf("j should have empty string")
 	}
 
-	q.Column(table2, "col1")
+	q.Column(ColumnName{Table: table2, Name: "col1"})
 	_, _ = q.getSelect()
 
 	j, err = q.getJoin()
@@ -496,7 +369,7 @@ func TestSelectQuery_getJoin(t *testing.T) {
 		t.Errorf("bad returned join. return %s", j)
 	}
 
-	q.Column(table3, "col2")
+	q.Column(ColumnName{Table: table3, Name: "col2"})
 	_, _ = q.getSelect()
 
 	j, err = q.getJoin()
@@ -515,8 +388,8 @@ func TestSelectQuery_Get(t *testing.T) {
 	q := NewSelect()
 	q.
 		From(table1).
-		Column(table1, "id").
-		Column(table2, "col").
+		Column(ColumnName{Table: table1, Name: "id"}).
+		Column(ColumnName{Table: table2, Name: "col"}).
 		LeftJoin(table2, OnEq{Table1: table1, Table2: table2, Column1: "id", Column2: "table_id"}).
 		Where(WhereEq{Table: table1, Column: "id", Value: 1}).
 		Order(Order{Table: table1, Column: "name", Desc: true}).

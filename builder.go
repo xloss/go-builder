@@ -6,13 +6,6 @@ type query interface {
 	Get() (string, map[string]any, error)
 }
 
-type column struct {
-	Table     *Table
-	Name      string
-	Alias     string
-	Aggregate bool
-}
-
 type set struct {
 	Column string
 	Value  interface{}

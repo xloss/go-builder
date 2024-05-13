@@ -5,7 +5,7 @@ import "fmt"
 type InsertQuery struct {
 	table   *Table
 	values  []insertValue
-	columns []column
+	returns []Column
 	binds   map[string]any
 }
 
@@ -30,14 +30,8 @@ func (q *InsertQuery) Value(column string, v any) *InsertQuery {
 	return q
 }
 
-func (q *InsertQuery) Column(table *Table, name string) *InsertQuery {
-	q.columns = append(q.columns, column{Table: table, Name: name})
-
-	return q
-}
-
-func (q *InsertQuery) ColumnAlias(table *Table, name, alias string) *InsertQuery {
-	q.columns = append(q.columns, column{Table: table, Name: name, Alias: alias})
+func (q *InsertQuery) Return(c ...Column) *InsertQuery {
+	q.returns = append(q.returns, c...)
 
 	return q
 }
@@ -66,26 +60,27 @@ func (q *InsertQuery) getValues() (string, error) {
 	return " (" + c + ") VALUES (" + t + ")", nil
 }
 
-func (q *InsertQuery) getReturns() string {
-	if len(q.columns) == 0 {
-		return ""
+func (q *InsertQuery) getReturns() (string, error) {
+	if len(q.returns) == 0 {
+		return "", nil
 	}
 
 	var s string
 
-	for i, v := range q.columns {
-		s += v.Table.Alias + "." + v.Name
-
-		if v.Alias != "" {
-			s += " as " + v.Alias
+	for i, v := range q.returns {
+		c, err := v.gen(q)
+		if err != nil {
+			return "", err
 		}
 
-		if i < len(q.columns)-1 {
+		s += c
+
+		if i != len(q.returns)-1 {
 			s += ", "
 		}
 	}
 
-	return " RETURNING " + s
+	return " RETURNING " + s, nil
 }
 
 func (q *InsertQuery) Get() (string, map[string]any, error) {
@@ -98,7 +93,10 @@ func (q *InsertQuery) Get() (string, map[string]any, error) {
 		return "", nil, err
 	}
 
-	returns := q.getReturns()
+	returns, err := q.getReturns()
+	if err != nil {
+		return "", nil, err
+	}
 
 	return "INSERT INTO " + q.table.Name + " AS " + q.table.Alias + values + returns, q.binds, nil
 }

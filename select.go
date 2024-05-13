@@ -6,7 +6,7 @@ import (
 
 type SelectQuery struct {
 	from    []*Table
-	columns []column
+	columns []Column
 	joins   []*join
 	where   Where
 	order   []Order
@@ -49,37 +49,8 @@ func (q *SelectQuery) From(t ...*Table) *SelectQuery {
 	return q
 }
 
-func (q *SelectQuery) Column(table *Table, name string) *SelectQuery {
-	q.columns = append(q.columns, column{Table: table, Name: name})
-
-	return q
-}
-
-func (q *SelectQuery) ColumnAlias(table *Table, name, alias string) *SelectQuery {
-	q.columns = append(q.columns, column{Table: table, Name: name, Alias: alias})
-
-	return q
-}
-
-func (q *SelectQuery) ColumnCount(table *Table, alias string) *SelectQuery {
-	q.columns = append(q.columns, column{Table: table, Name: `COUNT(*)`, Alias: alias, Aggregate: true})
-
-	return q
-}
-
-func (q *SelectQuery) ColumnCoalesce(table *Table, name, alias string, def any) *SelectQuery {
-	d := ""
-
-	switch def.(type) {
-	case string:
-		d = "'" + def.(string) + "'"
-	default:
-		d = fmt.Sprintf("%v", def)
-	}
-
-	name = "COALESCE(" + table.Alias + "." + name + ", " + d + ")"
-
-	q.columns = append(q.columns, column{Table: table, Name: name, Alias: alias, Aggregate: true})
+func (q *SelectQuery) Column(c ...Column) *SelectQuery {
+	q.columns = append(q.columns, c...)
 
 	return q
 }
@@ -136,19 +107,12 @@ func (q *SelectQuery) getSelect() (string, error) {
 	s := "SELECT "
 
 	for i, col := range q.columns {
-		if !q.checkTable(col.Table) {
-			return "", fmt.Errorf("table %s is not exist", col.Table)
+		c, err := col.gen(q)
+		if err != nil {
+			return "", err
 		}
 
-		if !col.Aggregate {
-			s += col.Table.Alias + "."
-		}
-
-		s += col.Name
-
-		if col.Alias != "" {
-			s += " as " + col.Alias
-		}
+		s += c
 
 		if i != len(q.columns)-1 {
 			s += ", "
