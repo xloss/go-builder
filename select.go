@@ -12,6 +12,7 @@ type SelectQuery struct {
 	order   []Order
 	limit   string
 	offset  string
+	group   []Group
 	binds   map[string]any
 }
 
@@ -95,6 +96,12 @@ func (q *SelectQuery) Offset(offset int) *SelectQuery {
 
 	q.offset = "offset_" + randStr()
 	q.addBind(q.offset, offset)
+
+	return q
+}
+
+func (q *SelectQuery) Group(g ...Group) *SelectQuery {
+	q.group = append(q.group, g...)
 
 	return q
 }
@@ -223,6 +230,29 @@ func (q *SelectQuery) getJoin() (string, error) {
 	return s, nil
 }
 
+func (q *SelectQuery) getGroup() (string, error) {
+	if len(q.group) == 0 {
+		return "", nil
+	}
+
+	s := " GROUP BY "
+
+	for i, g := range q.group {
+		sql, err := g.gen(q)
+		if err != nil {
+			return "", err
+		}
+
+		s += sql
+
+		if i != len(q.group)-1 {
+			s += ", "
+		}
+	}
+
+	return s, nil
+}
+
 func (q *SelectQuery) Get() (string, map[string]any, error) {
 	sel, err := q.getSelect()
 	if err != nil {
@@ -249,6 +279,11 @@ func (q *SelectQuery) Get() (string, map[string]any, error) {
 		return "", nil, err
 	}
 
+	group, err := q.getGroup()
+	if err != nil {
+		return "", nil, err
+	}
+
 	limit := ""
 	if q.limit != "" {
 		limit = " LIMIT @" + q.limit
@@ -259,5 +294,5 @@ func (q *SelectQuery) Get() (string, map[string]any, error) {
 		offset = " OFFSET @" + q.offset
 	}
 
-	return sel + from + j + where + order + limit + offset, q.binds, nil
+	return sel + from + j + where + group + order + limit + offset, q.binds, nil
 }

@@ -187,6 +187,27 @@ func TestSelectQuery_Offset(t *testing.T) {
 	}
 }
 
+func TestSelectQuery_Group(t *testing.T) {
+	table := NewTable("table")
+
+	group1 := GroupColumn{Table: table, Column: "col1"}
+	group2 := GroupColumn{Column: "col2"}
+
+	q := NewSelect()
+	q.Group(group1, group2)
+
+	if len(q.group) != 2 {
+		t.Errorf("q.group should have 2 values")
+	}
+
+	if q.group[0] != group1 {
+		t.Errorf("q.group[0] should have group1")
+	}
+	if q.group[1] != group2 {
+		t.Errorf("q.group[1] should have group2")
+	}
+}
+
 func TestSelectQuery_getSelect(t *testing.T) {
 	table1 := NewTable("table1")
 	table2 := NewTable("table2")
@@ -328,7 +349,7 @@ func TestSelectQuery_getOrder(t *testing.T) {
 	q.Order(Order{Column: "col2", Desc: true})
 
 	if len(q.order) != 2 {
-		t.Errorf("q.order should have 1 values")
+		t.Errorf("q.order should have 2 values")
 	}
 
 	order, err = q.getOrder()
@@ -378,6 +399,49 @@ func TestSelectQuery_getJoin(t *testing.T) {
 	}
 	if j != " LEFT JOIN "+table2.Name+" AS "+table2.Alias+" ON "+table1.Alias+".id = "+table2.Alias+".table_id LEFT JOIN "+table3.Name+" AS "+table3.Alias+" ON "+table3.Alias+".id = "+table2.Alias+".table_id" {
 		t.Errorf("bad returned join. return %s", j)
+	}
+}
+
+func TestSelectQuery_getGroup(t *testing.T) {
+	table := NewTable("table")
+
+	q := NewSelect()
+	q.From(table)
+
+	group, err := q.getGroup()
+	if err != nil {
+		t.Errorf("q.getGroup should not have returned error. return: %e", err)
+	}
+	if group != "" {
+		t.Errorf("group should have empty string")
+	}
+
+	q.Group(GroupColumn{Table: table, Column: "col1"})
+
+	if len(q.group) != 1 {
+		t.Errorf("q.group should have 1 values")
+	}
+
+	group, err = q.getGroup()
+	if err != nil {
+		t.Errorf("q.getOrder should not have returned error. return: %e", err)
+	}
+	if group != " GROUP BY "+table.Alias+".col1" {
+		t.Errorf("bad returned select. return %s", group)
+	}
+
+	q.Group(GroupColumn{Column: "col2"})
+
+	if len(q.group) != 2 {
+		t.Errorf("q.group should have 2 values")
+	}
+
+	group, err = q.getGroup()
+	if err != nil {
+		t.Errorf("q.getGroup should not have returned error. return: %e", err)
+	}
+	if group != " GROUP BY "+table.Alias+".col1, col2" {
+		t.Errorf("bad returned order. return %s", group)
 	}
 }
 
