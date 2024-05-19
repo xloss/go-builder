@@ -130,7 +130,16 @@ func (q *SelectQuery) getFrom() (string, error) {
 	s := " FROM "
 
 	for i, from := range q.from {
-		s += from.Name + " as " + from.Alias
+		sql, binds, err := from.gen()
+		if err != nil {
+			return "", err
+		}
+
+		for k, v := range binds {
+			q.addBind(k, v)
+		}
+
+		s += sql
 
 		if i != len(q.from)-1 {
 			s += ", "

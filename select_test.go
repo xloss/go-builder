@@ -226,7 +226,7 @@ func TestSelectQuery_getFrom(t *testing.T) {
 	if err != nil {
 		t.Errorf("q.getFrom should not have returned error. return: %e", err)
 	}
-	if s != fmt.Sprintf(" FROM table1 as %s, table2 as %s", table1.Alias, table2.Alias) {
+	if s != fmt.Sprintf(" FROM table1 AS %s, table2 AS %s", table1.Alias, table2.Alias) {
 		t.Errorf("bad returned from. return '%s'", s)
 	}
 }
@@ -416,7 +416,7 @@ func TestSelectQuery_Get(t *testing.T) {
 		}
 	}
 
-	st := fmt.Sprintf("SELECT %[2]s.id, %[4]s.col FROM %[1]s as %[2]s LEFT JOIN %[3]s AS %[4]s ON %[2]s.id = %[4]s.table_id WHERE %[2]s.id = @%[5]s ORDER BY %[2]s.name DESC LIMIT @%[6]s OFFSET @%[7]s", table1.Name, table1.Alias, table2.Name, table2.Alias, w, l, o)
+	st := fmt.Sprintf("SELECT %[2]s.id, %[4]s.col FROM %[1]s AS %[2]s LEFT JOIN %[3]s AS %[4]s ON %[2]s.id = %[4]s.table_id WHERE %[2]s.id = @%[5]s ORDER BY %[2]s.name DESC LIMIT @%[6]s OFFSET @%[7]s", table1.Name, table1.Alias, table2.Name, table2.Alias, w, l, o)
 	if sql != st {
 		t.Errorf("bad returned sql. return:\n'%s'\n'%s'", sql, st)
 	}
