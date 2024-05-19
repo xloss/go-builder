@@ -512,3 +512,48 @@ func TestWhereJsonbTextExist_gen(t *testing.T) {
 		t.Errorf("sql is wrong, sql is %s", sql)
 	}
 }
+
+func TestWhereJsonbTextInExist_gen(t *testing.T) {
+	table := NewTable("table")
+	q := NewSelect()
+	q.From(table)
+
+	where := WhereJsonbTextInExist{
+		Table:  table,
+		Column: "col",
+		Values: []string{"value1", "value2"},
+	}
+
+	sql, binds, err := where.gen(q)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(binds) != 1 {
+		t.Errorf("bind len should be 1, but got %v", len(binds))
+	}
+
+	var (
+		tag   string
+		value []string
+	)
+
+	for k, v := range binds {
+		tag, value = k, v.([]string)
+	}
+
+	if len(value) != 2 {
+		t.Errorf("value is wrong")
+	}
+
+	if value[0] != "value1" {
+		t.Errorf("value1 is wrong")
+	}
+
+	if value[1] != "value2" {
+		t.Errorf("value2 is wrong")
+	}
+
+	if sql != table.Alias+".col ?| @"+tag {
+		t.Errorf("sql is wrong, sql is %s", sql)
+	}
+}
