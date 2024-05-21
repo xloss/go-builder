@@ -9,9 +9,10 @@ type Column interface {
 }
 
 type ColumnName struct {
-	Table *Table
-	Name  string
-	Alias string
+	Table    *Table
+	Name     string
+	Alias    string
+	Distinct bool
 }
 
 func (c ColumnName) gen(q query) (string, error) {
@@ -23,7 +24,13 @@ func (c ColumnName) gen(q query) (string, error) {
 		return "", fmt.Errorf("name is empty")
 	}
 
-	s := c.Table.Alias + "." + c.Name
+	s := ""
+
+	if c.Distinct {
+		s += "DISTINCT "
+	}
+
+	s += c.Table.Alias + "." + c.Name
 
 	if c.Alias != "" {
 		s += " AS " + c.Alias
@@ -33,9 +40,10 @@ func (c ColumnName) gen(q query) (string, error) {
 }
 
 type ColumnCount struct {
-	Table *Table
-	Name  string
-	Alias string
+	Table    *Table
+	Name     string
+	Alias    string
+	Distinct bool
 }
 
 func (c ColumnCount) gen(q query) (string, error) {
@@ -46,6 +54,10 @@ func (c ColumnCount) gen(q query) (string, error) {
 	s := "COUNT("
 
 	if q.checkTable(c.Table) && c.Name != "" {
+		if c.Distinct {
+			s += "DISTINCT "
+		}
+
 		s += c.Table.Alias + "." + c.Name
 	} else {
 		s += "*"
