@@ -76,6 +76,61 @@ func TestInsertQuery_Return(t *testing.T) {
 	}
 }
 
+func TestInsertQuery_OnConflict(t *testing.T) {
+	table := NewTable("table")
+	q := NewInsert(table)
+
+	q.OnConflict("col1", "col2")
+
+	if len(q.conflict) != 2 {
+		t.Errorf("q.conflict should have 2 values")
+	}
+}
+
+func TestInsertQuery_UpdateSet(t *testing.T) {
+	table := NewTable("table")
+	q := NewInsert(table)
+
+	q.UpdateSet("col1", 1)
+	q.UpdateSet("col2", "a")
+
+	if len(q.update) != 2 {
+		t.Errorf("q.update should have 2 values")
+	}
+	if q.update[0].Column != "col1" {
+		t.Errorf("q.update[0].Column should have col1")
+	}
+	if q.update[0].Value != 1 {
+		t.Errorf("q.update[0].Value should have 1")
+	}
+	if q.update[1].Column != "col2" {
+		t.Errorf("q.update[1].Column should have col2")
+	}
+	if q.update[1].Value != "a" {
+		t.Errorf("q.update[1].Value should have a")
+	}
+}
+
+func TestInsertQuery_UpdateSetNow(t *testing.T) {
+	table := NewTable("table")
+	q := NewInsert(table)
+
+	q.UpdateSetNow("col1")
+
+	if len(q.update) != 1 {
+		t.Errorf("q.update should have 2 values")
+	}
+	if q.update[0].Column != "col1" {
+		t.Errorf("q.update[0].Column should have col1")
+	}
+	if q.update[0].Value != nil {
+		t.Errorf("q.update[0].Value should have 1")
+	}
+	if !q.update[0].Now {
+		t.Errorf("q.update[0].Now should have true")
+	}
+}
+
 func TestInsertQuery_getValues(t *testing.T) {
 	table := NewTable("table")
 	q := NewInsert(table)
@@ -100,6 +155,56 @@ func TestInsertQuery_getValues(t *testing.T) {
 
 	if values != " (col1, col2) VALUES (@"+tag1+", @"+tag2+")" {
 		t.Errorf("q.getValues() returned %v", values)
+	}
+}
+
+func TestInsertQuery_getConflict(t *testing.T) {
+	table := NewTable("table")
+	q := NewInsert(table)
+
+	sql := q.getConflict()
+	if sql != "" {
+		t.Errorf("q.getConflict() returned %v", sql)
+	}
+
+	q.OnConflict("col1", "col2")
+
+	sql = q.getConflict()
+	if sql != " ON CONFLICT (col1, col2)" {
+		t.Errorf("q.getConflict() returned %v", sql)
+	}
+}
+
+func TestInsertQuery_getUpdate(t *testing.T) {
+	table := NewTable("table")
+	q := NewInsert(table)
+
+	sql := q.getUpdate()
+	if sql != "" {
+		t.Errorf("q.getUpdate() returned %v", sql)
+	}
+
+	q.OnConflict("col1")
+	sql = q.getUpdate()
+	if sql != "" {
+		t.Errorf("q.getUpdate() returned %v", sql)
+	}
+
+	q.UpdateSet("col1", "value1")
+	q.UpdateSetNow("col2")
+
+	sql = q.getUpdate()
+
+	var tag string
+
+	for k, v := range q.binds {
+		if v == "value1" {
+			tag = k
+		}
+	}
+
+	if sql != " DO UPDATE SET col1 = @"+tag+", col2 = NOW()" {
+		t.Errorf("q.getSet() returned '%v'", sql)
 	}
 }
 
@@ -134,6 +239,9 @@ func TestInsertQuery_Get(t *testing.T) {
 	q.Value("col1", 5)
 	q.Value("col2", "str")
 
+	q.OnConflict("col1")
+	q.UpdateSet("col2", "val")
+
 	q.Return(ColumnName{Table: table, Name: "col1"})
 	q.Return(ColumnName{Table: table, Name: "col2", Alias: "a1"})
 
@@ -142,21 +250,23 @@ func TestInsertQuery_Get(t *testing.T) {
 		t.Errorf("q.Get() returned %v", err)
 	}
 
-	var tag1, tag2 string
+	var tag1, tag2, tag3 string
 
 	for k, v := range binds {
 		if v == 5 {
 			tag1 = k
 		} else if v == "str" {
 			tag2 = k
+		} else if v == "val" {
+			tag3 = k
 		}
 	}
 
-	if len(binds) != 2 {
+	if len(binds) != 3 {
 		t.Errorf("q.Get() should have 2 values")
 	}
 
-	if sql != fmt.Sprintf("INSERT INTO %[1]s AS %[2]s (col1, col2) VALUES (@%[3]s, @%[4]s) RETURNING %[2]s.col1, %[2]s.col2 AS a1", table.Name, table.Alias, tag1, tag2) {
+	if sql != fmt.Sprintf("INSERT INTO %[1]s AS %[2]s (col1, col2) VALUES (@%[3]s, @%[4]s) ON CONFLICT (col1) DO UPDATE SET col2 = @%[5]s RETURNING %[2]s.col1, %[2]s.col2 AS a1", table.Name, table.Alias, tag1, tag2, tag3) {
 		t.Errorf("q.Get() returned '%v'", sql)
 	}
 }

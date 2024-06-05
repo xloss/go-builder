@@ -77,9 +77,8 @@ func TestName(t *testing.T) {
 	q2.From(table2)
 	q2.Column(ColumnName{Table: table2, Name: "column1"})
 
-	sql, _, err := q2.Get()
+	_, _, err := q2.Get()
 	if err != nil {
 		t.Error(err)
 	}
-	fmt.Println(sql)
 }
