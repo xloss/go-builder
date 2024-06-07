@@ -485,3 +485,17 @@ func TestSelectQuery_Get(t *testing.T) {
 		t.Errorf("bad returned sql. return:\n'%s'\n'%s'", sql, st)
 	}
 }
+
+func ExampleNewSelect() {
+	table1 := NewTable("table1")
+	query1 := NewSelect()
+	query1.Column(ColumnName{Table: table1, Name: "column1"})
+	query1.From(table1)
+
+	fmt.Println(query1.Get())
+
+	// Result:
+	// SELECT table1_pdddspkqfu.column1 FROM table1 AS table1_pdddspkqfu
+	// map[]
+	// <nil>
+}

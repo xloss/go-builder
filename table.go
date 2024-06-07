@@ -29,6 +29,7 @@ func (t Table) gen() (string, map[string]any, error) {
 	return s, binds, nil
 }
 
+// Creating Table struct for use in Builder
 func NewTable(name string) *Table {
 	return &Table{
 		Name:  name,
@@ -36,6 +37,7 @@ func NewTable(name string) *Table {
 	}
 }
 
+// Using Query as subquery in FROM
 func NewTableSub(q query) *Table {
 	return &Table{
 		Alias: randStr() + "_" + randStr(),

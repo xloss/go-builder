@@ -9,8 +9,8 @@ type Column interface {
 }
 
 type ColumnName struct {
-	Table    *Table
-	Name     string
+	Table    *Table // required
+	Name     string // required
 	Alias    string
 	Distinct bool
 }
@@ -40,9 +40,9 @@ func (c ColumnName) gen(q query) (string, error) {
 }
 
 type ColumnCount struct {
-	Table    *Table
+	Table    *Table // required
 	Name     string
-	Alias    string
+	Alias    string // required
 	Distinct bool
 }
 
@@ -69,10 +69,10 @@ func (c ColumnCount) gen(q query) (string, error) {
 }
 
 type ColumnCoalesce struct {
-	Table   *Table
-	Name    string
-	Alias   string
-	Default any
+	Table   *Table // required
+	Name    string // required
+	Alias   string // required
+	Default any    // required
 }
 
 func (c ColumnCoalesce) gen(q query) (string, error) {
@@ -105,9 +105,9 @@ func (c ColumnCoalesce) gen(q query) (string, error) {
 }
 
 type ColumnJsonbArrayElementsText struct {
-	Table    *Table
-	Name     string
-	Alias    string
+	Table    *Table // required
+	Name     string // required
+	Alias    string // required
 	Distinct bool
 }
 

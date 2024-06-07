@@ -1,6 +1,9 @@
 package builder
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestColumnName_gen(t *testing.T) {
 	table := NewTable("table")
@@ -180,4 +183,74 @@ func TestColumnJsonbArrayElementsText_gen(t *testing.T) {
 	if sql != "DISTINCT JSONB_ARRAY_ELEMENTS_TEXT("+table.Alias+"."+c.Name+") AS "+c.Alias {
 		t.Fatal(sql)
 	}
+}
+
+func ExampleColumnName() {
+	table1 := NewTable("table1")
+	query1 := NewSelect()
+	query1.Column(
+		ColumnName{Table: table1, Name: "column1"},
+		ColumnName{Table: table1, Name: "column2", Alias: "a2"},
+		ColumnName{Table: table1, Name: "column3", Distinct: true},
+	)
+	query1.From(table1)
+
+	fmt.Println(query1.Get())
+
+	// Result:
+	// SELECT table1_punanojozl.column1, table1_punanojozl.column2 AS a2, DISTINCT table1_punanojozl.column3 FROM table1 AS table1_punanojozl
+	// map[]
+	// <nil>
+}
+
+func ExampleColumnCount() {
+	table1 := NewTable("table1")
+	query1 := NewSelect()
+	query1.Column(
+		ColumnCount{Table: table1, Alias: "a1"},
+		ColumnCount{Table: table1, Name: "column2", Alias: "a2"},
+		ColumnCount{Table: table1, Name: "column3", Alias: "a3", Distinct: true},
+	)
+	query1.From(table1)
+
+	fmt.Println(query1.Get())
+
+	// Result:
+	// SELECT COUNT(*) AS a1, COUNT(table1_yyapxlsrva.column2) AS a2, COUNT(DISTINCT table1_yyapxlsrva.column3) AS a3 FROM table1 AS table1_yyapxlsrva
+	// map[]
+	// <nil>
+}
+
+func ExampleColumnCoalesce() {
+	table1 := NewTable("table1")
+	query1 := NewSelect()
+	query1.Column(
+		ColumnCoalesce{Table: table1, Name: "column1", Alias: "a1", Default: 5},
+		ColumnCoalesce{Table: table1, Name: "column2", Alias: "a2", Default: "text"},
+	)
+	query1.From(table1)
+
+	fmt.Println(query1.Get())
+
+	// Result:
+	// SELECT COALESCE(table1_yzethlflca.column1, 5) AS a1, COALESCE(table1_yzethlflca.column2, 'text') AS a2 FROM table1 AS table1_yzethlflca
+	// map[]
+	// <nil>
+}
+
+func ExampleColumnJsonbArrayElementsText() {
+	table1 := NewTable("table1")
+	query1 := NewSelect()
+	query1.Column(
+		ColumnJsonbArrayElementsText{Table: table1, Name: "column1", Alias: "a1"},
+		ColumnJsonbArrayElementsText{Table: table1, Name: "column2", Alias: "a2", Distinct: true},
+	)
+	query1.From(table1)
+
+	fmt.Println(query1.Get())
+
+	// Result:
+	// SELECT JSONB_ARRAY_ELEMENTS_TEXT(table1_yifmeamxwi.column1) AS a1, DISTINCT JSONB_ARRAY_ELEMENTS_TEXT(table1_yifmeamxwi.column2) AS a2 FROM table1 AS table1_yifmeamxwi
+	// map[]
+	// <nil>
 }

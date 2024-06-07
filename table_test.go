@@ -82,3 +82,22 @@ func TestName(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func ExampleNewTableSub() {
+	table1 := NewTable("table1")
+	query1 := NewSelect()
+	query1.Column(ColumnName{Table: table1, Name: "column1"})
+	query1.From(table1)
+
+	table2 := NewTableSub(query1)
+	query2 := NewSelect()
+	query2.Column(ColumnName{Table: table2, Name: "column2"})
+	query2.From(table2)
+
+	fmt.Println(query2.Get())
+
+	// Result:
+	// SELECT yccakzcfbx_dxaolgmqrw.column2 FROM (SELECT table1_fmxwghcgnt.column1 FROM table1 AS table1_fmxwghcgnt) AS yccakzcfbx_dxaolgmqrw
+	// map[]
+	// <nil>
+}
