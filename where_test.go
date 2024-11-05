@@ -41,6 +41,33 @@ func TestWhereEq_gen(t *testing.T) {
 	}
 }
 
+func TestWhereEqColumn_gen(t *testing.T) {
+	table1 := NewTable("table")
+	table2 := NewTable("table")
+	q := NewSelect()
+	q.From(table1, table2)
+
+	where := WhereEqColumn{
+		Table1:  table1,
+		Column1: "col1",
+		Table2:  table2,
+		Column2: "col2",
+	}
+
+	sql, binds, err := where.gen(q)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(binds) != 0 {
+		t.Errorf("bind len should be 0, but got %v", len(binds))
+	}
+
+	if sql != table1.Alias+".col1 = "+table2.Alias+".col2" {
+		t.Errorf("sql is wrong, sql is %s", sql)
+	}
+}
+
 func TestWhereIsNull_gen(t *testing.T) {
 	table := NewTable("table")
 	q := NewSelect()
