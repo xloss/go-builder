@@ -14,6 +14,7 @@ type SelectQuery struct {
 	offset  string
 	group   []Group
 	binds   map[string]any
+	isSub   bool
 }
 
 func NewSelect() *SelectQuery {
@@ -23,6 +24,10 @@ func NewSelect() *SelectQuery {
 }
 
 func (q *SelectQuery) checkTable(table *Table) bool {
+	if q.isSub {
+		return true
+	}
+
 	for _, t := range q.from {
 		if t == table {
 			return true
@@ -102,6 +107,12 @@ func (q *SelectQuery) Offset(offset int) *SelectQuery {
 
 func (q *SelectQuery) Group(g ...Group) *SelectQuery {
 	q.group = append(q.group, g...)
+
+	return q
+}
+
+func (q *SelectQuery) IsSub() *SelectQuery {
+	q.isSub = true
 
 	return q
 }

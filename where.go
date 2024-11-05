@@ -361,3 +361,23 @@ func (w WhereJsonbTextInExist) gen(q query) (string, map[string]any, error) {
 
 	return w.Table.Alias + "." + w.Column + " ?| @" + tag, map[string]any{tag: w.Values}, nil
 }
+
+type WhereExists struct {
+	Query *SelectQuery
+}
+
+func (w WhereExists) gen(q query) (string, map[string]any, error) {
+	if q == nil {
+		return "", nil, fmt.Errorf("query cannot be nil")
+	}
+
+	w.Query.IsSub()
+	w.Query.Column(ColumnValue{Value: 1})
+
+	sql, binds, err := w.Query.Get()
+	if err != nil {
+		return "", nil, err
+	}
+
+	return "EXISTS(" + sql + ")", binds, nil
+}

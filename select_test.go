@@ -39,6 +39,12 @@ func TestSelectQuery_checkTable(t *testing.T) {
 	if q.checkTable(table2) {
 		t.Errorf("q.checkTable() returned true")
 	}
+
+	q.IsSub()
+
+	if !q.checkTable(table2) {
+		t.Errorf("q.checkTable() returned false")
+	}
 }
 
 func TestSelectQuery_From(t *testing.T) {
@@ -205,6 +211,15 @@ func TestSelectQuery_Group(t *testing.T) {
 	}
 	if q.group[1] != group2 {
 		t.Errorf("q.group[1] should have group2")
+	}
+}
+
+func TestSelectQuery_IsSub(t *testing.T) {
+	q := NewSelect()
+	q.IsSub()
+
+	if !q.isSub {
+		t.Errorf("q.isSub should have true")
 	}
 }
 

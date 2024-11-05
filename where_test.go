@@ -584,3 +584,45 @@ func TestWhereJsonbTextInExist_gen(t *testing.T) {
 		t.Errorf("sql is wrong, sql is %s", sql)
 	}
 }
+
+func TestWhereExists_gen(t *testing.T) {
+	table1 := NewTable("table1")
+	table2 := NewTable("table2")
+	q1 := NewSelect()
+	q1.From(table1)
+	q2 := NewSelect()
+	q2.From(table2)
+	q2.IsSub()
+	q2.Where(WhereAnd{List: []Where{
+		WhereEq{Table: table2, Column: "col1", Value: "value1"},
+		WhereEqColumn{Table1: table1, Column1: "col3", Table2: table2, Column2: "col2"},
+	}})
+
+	where := WhereExists{
+		Query: q2,
+	}
+
+	sql, binds, err := where.gen(q1)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(binds) != 1 {
+		t.Errorf("bind len should be 1, but got %v", len(binds))
+	}
+
+	var (
+		tag, value string
+	)
+
+	for k, v := range binds {
+		tag, value = k, v.(string)
+	}
+
+	if value != "value1" {
+		t.Errorf("value is wrong")
+	}
+
+	if sql != "EXISTS(SELECT 1 FROM table2 AS "+table2.Alias+" WHERE ("+table2.Alias+".col1 = @"+tag+" AND "+table1.Alias+".col3 = "+table2.Alias+".col2))" {
+		t.Errorf("sql is wrong, sql is %s", sql)
+	}
+}
