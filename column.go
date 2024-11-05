@@ -132,3 +132,29 @@ func (c ColumnJsonbArrayElementsText) gen(q query) (string, error) {
 
 	return s + "JSONB_ARRAY_ELEMENTS_TEXT(" + c.Table.Alias + "." + c.Name + ") AS " + c.Alias, nil
 }
+
+type ColumnValue struct {
+	Value any // required
+	Alias string
+}
+
+func (c ColumnValue) gen(_ query) (string, error) {
+	if c.Value == nil {
+		return "", fmt.Errorf("value is empty")
+	}
+
+	s := ""
+
+	switch c.Value.(type) {
+	case string:
+		s = fmt.Sprintf("'%s'", c.Value)
+	default:
+		s = fmt.Sprintf("%v", c.Value)
+	}
+
+	if c.Alias != "" {
+		s += " AS " + c.Alias
+	}
+
+	return s, nil
+}

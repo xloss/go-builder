@@ -185,6 +185,37 @@ func TestColumnJsonbArrayElementsText_gen(t *testing.T) {
 	}
 }
 
+func TestColumnValue_gen(t *testing.T) {
+	table := NewTable("table")
+	q := NewSelect()
+	q.From(table)
+
+	c1 := ColumnValue{Value: 1}
+	c2 := ColumnValue{Value: "1", Alias: "a1"}
+	c3 := ColumnValue{}
+
+	s1, err := c1.gen(q)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if s1 != "1" {
+		t.Fatal(s1)
+	}
+
+	s2, err := c2.gen(q)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if s2 != "'1' AS a1" {
+		t.Fatal(s2)
+	}
+
+	_, err = c3.gen(q)
+	if err == nil {
+		t.Error("expected error")
+	}
+}
+
 func ExampleColumnName() {
 	table1 := NewTable("table1")
 	query1 := NewSelect()
@@ -251,6 +282,23 @@ func ExampleColumnJsonbArrayElementsText() {
 
 	// Result:
 	// SELECT JSONB_ARRAY_ELEMENTS_TEXT(table1_yifmeamxwi.column1) AS a1, DISTINCT JSONB_ARRAY_ELEMENTS_TEXT(table1_yifmeamxwi.column2) AS a2 FROM table1 AS table1_yifmeamxwi
+	// map[]
+	// <nil>
+}
+
+func ExampleColumnValue() {
+	table1 := NewTable("table1")
+	query1 := NewSelect()
+	query1.Column(
+		ColumnValue{Value: 1},
+		ColumnValue{Value: "1", Alias: "a1"},
+	)
+	query1.From(table1)
+
+	fmt.Println(query1.Get())
+
+	// Result:
+	// SELECT 1, '1' AS a1 FROM table1 AS table1_punanojozl
 	// map[]
 	// <nil>
 }
