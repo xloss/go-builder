@@ -96,6 +96,18 @@ func TestUpdateQuery_Where(t *testing.T) {
 	}
 }
 
+func TestUpdateQuery_Return(t *testing.T) {
+	table := NewTable("table")
+	q := NewUpdate(table)
+
+	q.Return(ColumnName{Table: table, Name: "col1"})
+	q.Return(ColumnName{Table: table, Name: "col2", Alias: "a1"})
+
+	if len(q.returns) != 2 {
+		t.Errorf("q.values should have 2 values")
+	}
+}
+
 func TestUpdateQuery_getSet(t *testing.T) {
 	q := NewUpdate(NewTable("table"))
 
@@ -188,6 +200,30 @@ func TestUpdateQuery_getWhere(t *testing.T) {
 	}
 }
 
+func TestUpdateQuery_getReturns(t *testing.T) {
+	table := NewTable("table")
+	q := NewUpdate(table)
+
+	returns, err := q.getReturns()
+	if err != nil {
+		t.Errorf("q.getReturns() returned %v", err)
+	}
+	if returns != "" {
+		t.Errorf("q.getReturns() returned %v", returns)
+	}
+
+	q.Return(ColumnName{Table: table, Name: "col1"})
+	q.Return(ColumnName{Table: table, Name: "col2", Alias: "a1"})
+
+	returns, err = q.getReturns()
+	if err != nil {
+		t.Errorf("q.getReturns() returned %v", err)
+	}
+	if returns != " RETURNING "+table.Alias+".col1, "+table.Alias+".col2 AS a1" {
+		t.Errorf("q.getReturns() returned '%v'", returns)
+	}
+}
+
 func TestUpdateQuery_Get(t *testing.T) {
 	table := NewTable("table")
 
@@ -195,6 +231,9 @@ func TestUpdateQuery_Get(t *testing.T) {
 	q.Set("col1", "value1")
 	q.SetNow("col2")
 	q.Where(WhereEq{Table: table, Column: "col3", Value: 5})
+
+	q.Return(ColumnName{Table: table, Name: "col1"})
+	q.Return(ColumnName{Table: table, Name: "col2", Alias: "a1"})
 
 	sql, binds, err := q.Get()
 	if err != nil {
@@ -214,7 +253,7 @@ func TestUpdateQuery_Get(t *testing.T) {
 		}
 	}
 
-	st := fmt.Sprintf("UPDATE %[1]s AS %[2]s SET col1 = @%[3]s, col2 = NOW() WHERE %[2]s.col3 = @%[4]s", table.Name, table.Alias, val, where)
+	st := fmt.Sprintf("UPDATE %[1]s AS %[2]s SET col1 = @%[3]s, col2 = NOW() WHERE %[2]s.col3 = @%[4]s RETURNING %[2]s.col1, %[2]s.col2 AS a1", table.Name, table.Alias, val, where)
 	if sql != st {
 		t.Errorf("bad returned sql. return:\n'%s'\n'%s'", sql, st)
 	}

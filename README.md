@@ -60,12 +60,15 @@ q.Set("col1", "value1")
 q.SetNow("col2")
 q.Where(builder.WhereEq{Table: table, Column: "col3", Value: 5})
 
+q.Return(builder.ColumnName{Table: table, Name: "col1"})
+q.Return(builder.ColumnName{Table: table, Name: "col2", Alias: "a1"})
+
 sql, binds, err := q.Get()
 fmt.Println(sql)
 fmt.Println(binds)
 
 // Output:
-// UPDATE table AS table_kiykrrnhxf SET col1 = @col1_tolhdmocsn, col2 = NOW() WHERE table_kiykrrnhxf.col3 = @col3_tkdyhzjxqb
+// UPDATE table AS table_kiykrrnhxf SET col1 = @col1_tolhdmocsn, col2 = NOW() WHERE table_kiykrrnhxf.col3 = @col3_tkdyhzjxqb RETURNING table_kiykrrnhxf.col1, table_kiykrrnhxf.col2 AS a1
 // map[col1_tolhdmocsn:value1 col3_tkdyhzjxqb:5]
 ```
 ### Insert

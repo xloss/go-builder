@@ -5,10 +5,11 @@ import (
 )
 
 type UpdateQuery struct {
-	table *Table
-	sets  []set
-	where Where
-	binds map[string]any
+	table   *Table
+	sets    []set
+	where   Where
+	binds   map[string]any
+	returns []Column
 }
 
 func NewUpdate(table *Table) *UpdateQuery {
@@ -46,6 +47,12 @@ func (q *UpdateQuery) SetNow(column string) *UpdateQuery {
 
 func (q *UpdateQuery) Where(w Where) *UpdateQuery {
 	q.where = w
+
+	return q
+}
+
+func (q *UpdateQuery) Return(c ...Column) *UpdateQuery {
+	q.returns = append(q.returns, c...)
 
 	return q
 }
@@ -99,6 +106,29 @@ func (q *UpdateQuery) getWhere() (string, error) {
 	return " WHERE " + where, nil
 }
 
+func (q *UpdateQuery) getReturns() (string, error) {
+	if len(q.returns) == 0 {
+		return "", nil
+	}
+
+	var s string
+
+	for i, v := range q.returns {
+		c, err := v.gen(q)
+		if err != nil {
+			return "", err
+		}
+
+		s += c
+
+		if i != len(q.returns)-1 {
+			s += ", "
+		}
+	}
+
+	return " RETURNING " + s, nil
+}
+
 func (q *UpdateQuery) Get() (string, map[string]any, error) {
 	if q.table == nil {
 		return "", nil, fmt.Errorf("table not set")
@@ -114,5 +144,10 @@ func (q *UpdateQuery) Get() (string, map[string]any, error) {
 		return "", nil, err
 	}
 
-	return "UPDATE " + q.table.Name + " AS " + q.table.Alias + sets + where, q.binds, nil
+	returns, err := q.getReturns()
+	if err != nil {
+		return "", nil, err
+	}
+
+	return "UPDATE " + q.table.Name + " AS " + q.table.Alias + sets + where + returns, q.binds, nil
 }
