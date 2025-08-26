@@ -41,6 +41,43 @@ func TestWhereEq_gen(t *testing.T) {
 	}
 }
 
+func TestWhereNotEq_gen(t *testing.T) {
+	table := NewTable("table")
+	q := NewSelect()
+	q.From(table)
+
+	where := WhereNotEq{
+		Table:  table,
+		Column: "col",
+		Value:  "value",
+	}
+
+	sql, binds, err := where.gen(q)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(binds) != 1 {
+		t.Errorf("bind len should be 1, but got %v", len(binds))
+	}
+
+	var (
+		tag, value string
+	)
+
+	for k, v := range binds {
+		tag, value = k, v.(string)
+	}
+
+	if value != where.Value {
+		t.Errorf("value is wrong")
+	}
+
+	if sql != table.Alias+".col <> @"+tag {
+		t.Errorf("sql is wrong, sql is %s", sql)
+	}
+}
+
 func TestWhereEqColumn_gen(t *testing.T) {
 	table1 := NewTable("table")
 	table2 := NewTable("table")
@@ -64,6 +101,33 @@ func TestWhereEqColumn_gen(t *testing.T) {
 	}
 
 	if sql != table1.Alias+".col1 = "+table2.Alias+".col2" {
+		t.Errorf("sql is wrong, sql is %s", sql)
+	}
+}
+
+func TestWhereNotEqColumn_gen(t *testing.T) {
+	table1 := NewTable("table")
+	table2 := NewTable("table")
+	q := NewSelect()
+	q.From(table1, table2)
+
+	where := WhereNotEqColumn{
+		Table1:  table1,
+		Column1: "col1",
+		Table2:  table2,
+		Column2: "col2",
+	}
+
+	sql, binds, err := where.gen(q)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(binds) != 0 {
+		t.Errorf("bind len should be 0, but got %v", len(binds))
+	}
+
+	if sql != table1.Alias+".col1 <> "+table2.Alias+".col2" {
 		t.Errorf("sql is wrong, sql is %s", sql)
 	}
 }

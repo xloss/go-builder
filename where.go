@@ -29,6 +29,26 @@ func (w WhereEq) gen(q query) (string, map[string]any, error) {
 	return w.Table.Alias + "." + w.Column + " = @" + tag, map[string]any{tag: w.Value}, nil
 }
 
+type WhereNotEq struct {
+	Table  *Table
+	Column string
+	Value  interface{}
+}
+
+func (w WhereNotEq) gen(q query) (string, map[string]any, error) {
+	if q == nil {
+		return "", nil, fmt.Errorf("query cannot be nil")
+	}
+
+	if !q.checkTable(w.Table) {
+		return "", nil, fmt.Errorf("table %s does not exist", w.Table.Name)
+	}
+
+	tag := w.Column + "_" + randStr()
+
+	return w.Table.Alias + "." + w.Column + " <> @" + tag, map[string]any{tag: w.Value}, nil
+}
+
 type WhereEqColumn struct {
 	Table1  *Table
 	Table2  *Table
@@ -50,6 +70,29 @@ func (w WhereEqColumn) gen(q query) (string, map[string]any, error) {
 	}
 
 	return w.Table1.Alias + "." + w.Column1 + " = " + w.Table2.Alias + "." + w.Column2, nil, nil
+}
+
+type WhereNotEqColumn struct {
+	Table1  *Table
+	Table2  *Table
+	Column1 string
+	Column2 string
+}
+
+func (w WhereNotEqColumn) gen(q query) (string, map[string]any, error) {
+	if q == nil {
+		return "", nil, fmt.Errorf("query cannot be nil")
+	}
+
+	if !q.checkTable(w.Table1) {
+		return "", nil, fmt.Errorf("table %s does not exist", w.Table1.Name)
+	}
+
+	if !q.checkTable(w.Table2) {
+		return "", nil, fmt.Errorf("table %s does not exist", w.Table2.Name)
+	}
+
+	return w.Table1.Alias + "." + w.Column1 + " <> " + w.Table2.Alias + "." + w.Column2, nil, nil
 }
 
 type WhereIsNull struct {
