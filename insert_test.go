@@ -175,6 +175,23 @@ func TestInsertQuery_getConflict(t *testing.T) {
 	}
 }
 
+func TestInsertQuery_getConflictDoNothing(t *testing.T) {
+	table := NewTable("table")
+	q := NewInsert(table)
+
+	sql := q.getConflict()
+	if sql != "" {
+		t.Errorf("q.getConflict() returned %v", sql)
+	}
+
+	q.OnConflictDoNothing("col1", "col2")
+
+	sql = q.getConflict()
+	if sql != " ON CONFLICT (col1, col2) DO NOTHING" {
+		t.Errorf("q.getConflict() returned %v", sql)
+	}
+}
+
 func TestInsertQuery_getUpdate(t *testing.T) {
 	table := NewTable("table")
 	q := NewInsert(table)

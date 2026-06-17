@@ -6,12 +6,13 @@ import (
 )
 
 type InsertQuery struct {
-	table    *Table
-	values   []insertValue
-	conflict []string
-	update   []set
-	returns  []Column
-	binds    map[string]any
+	table             *Table
+	values            []insertValue
+	conflict          []string
+	conflictDoNothing bool
+	update            []set
+	returns           []Column
+	binds             map[string]any
 }
 
 func NewInsert(table *Table) *InsertQuery {
@@ -43,6 +44,13 @@ func (q *InsertQuery) Return(c ...Column) *InsertQuery {
 
 func (q *InsertQuery) OnConflict(c ...string) *InsertQuery {
 	q.conflict = append(q.conflict, c...)
+
+	return q
+}
+
+func (q *InsertQuery) OnConflictDoNothing(c ...string) *InsertQuery {
+	q.conflict = append(q.conflict, c...)
+	q.conflictDoNothing = true
 
 	return q
 }
@@ -88,11 +96,17 @@ func (q *InsertQuery) getConflict() string {
 		return ""
 	}
 
-	return " ON CONFLICT (" + strings.Join(q.conflict, ", ") + ")"
+	s := " ON CONFLICT (" + strings.Join(q.conflict, ", ") + ")"
+
+	if q.conflictDoNothing {
+		s += " DO NOTHING"
+	}
+
+	return s
 }
 
 func (q *InsertQuery) getUpdate() string {
-	if len(q.update) == 0 || len(q.conflict) == 0 {
+	if len(q.update) == 0 || len(q.conflict) == 0 || q.conflictDoNothing {
 		return ""
 	}
 
