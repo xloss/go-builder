@@ -1,5 +1,7 @@
 package builder
 
+import "fmt"
+
 type Table struct {
 	Name  string
 	Alias string
@@ -51,4 +53,24 @@ func NewTableSub(q query) *Table {
 		Alias: randStr() + "_" + randStr(),
 		Query: q,
 	}
+}
+
+func validateDMLTargetTable(table *Table) error {
+	if table == nil {
+		return fmt.Errorf("table not set")
+	}
+
+	if table.Query != nil {
+		return fmt.Errorf("subquery cannot be used as DML table")
+	}
+
+	if err := validateQualifiedIdentifier(table.Name, "table name"); err != nil {
+		return err
+	}
+
+	if err := validateIdentifier(table.Alias, "table alias"); err != nil {
+		return err
+	}
+
+	return nil
 }

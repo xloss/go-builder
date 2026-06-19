@@ -61,6 +61,17 @@ func TestUpdateQuery_Set(t *testing.T) {
 	}
 }
 
+func TestUpdateQuery_getSetInvalidColumn(t *testing.T) {
+	table := NewTable("table")
+	q := NewUpdate(table)
+	q.Set("bad column", 1)
+
+	_, err := q.getSet()
+	if err == nil {
+		t.Errorf("q.getSet should have returned error")
+	}
+}
+
 func TestUpdateQuery_SetNow(t *testing.T) {
 	table := NewTable("table")
 
@@ -75,6 +86,17 @@ func TestUpdateQuery_SetNow(t *testing.T) {
 	}
 	if !q.sets[0].Now {
 		t.Errorf("now should have true")
+	}
+}
+
+func TestUpdateQuery_SetNowInvalidColumn(t *testing.T) {
+	table := NewTable("table")
+	q := NewUpdate(table)
+	q.SetNow("bad column")
+
+	_, err := q.getSet()
+	if err == nil {
+		t.Errorf("q.getSet should have returned error")
 	}
 }
 
@@ -256,6 +278,42 @@ func TestUpdateQuery_Get(t *testing.T) {
 	st := fmt.Sprintf("UPDATE %[1]s AS %[2]s SET col1 = @%[3]s, col2 = NOW() WHERE %[2]s.col3 = @%[4]s RETURNING %[2]s.col1, %[2]s.col2 AS a1", table.Name, table.Alias, val, where)
 	if sql != st {
 		t.Errorf("bad returned sql. return:\n'%s'\n'%s'", sql, st)
+	}
+}
+
+func TestUpdateQuery_GetInvalidTableName(t *testing.T) {
+	table := NewTable("bad table")
+	q := NewUpdate(table)
+	q.Set("col1", 1)
+
+	_, _, err := q.Get()
+	if err == nil {
+		t.Errorf("q.Get should have returned error")
+	}
+}
+
+func TestUpdateQuery_GetInvalidTableAlias(t *testing.T) {
+	table := NewTable("table")
+	table.Alias = "bad alias"
+
+	q := NewUpdate(table)
+	q.Set("col1", 1)
+
+	_, _, err := q.Get()
+	if err == nil {
+		t.Errorf("q.Get should have returned error")
+	}
+}
+
+func TestUpdateQuery_GetSubqueryTable(t *testing.T) {
+	table := NewTableSub(NewSelect())
+
+	q := NewUpdate(table)
+	q.Set("col1", 1)
+
+	_, _, err := q.Get()
+	if err == nil {
+		t.Errorf("q.Get should have returned error")
 	}
 }
 

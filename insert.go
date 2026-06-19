@@ -83,6 +83,10 @@ func (q *InsertQuery) getValues() (string, error) {
 	var c, t string
 
 	for i, v := range q.values {
+		if err := validateIdentifier(v.Column, "insert column"); err != nil {
+			return "", err
+		}
+
 		tag := v.Column + "_" + randStr()
 
 		c += v.Column
@@ -99,9 +103,15 @@ func (q *InsertQuery) getValues() (string, error) {
 	return " (" + c + ") VALUES (" + t + ")", nil
 }
 
-func (q *InsertQuery) getConflict() string {
+func (q *InsertQuery) getConflict() (string, error) {
 	if len(q.conflict) == 0 {
-		return ""
+		return "", nil
+	}
+
+	for _, column := range q.conflict {
+		if err := validateIdentifier(column, "conflict column"); err != nil {
+			return "", err
+		}
 	}
 
 	s := " ON CONFLICT (" + strings.Join(q.conflict, ", ") + ")"
@@ -110,17 +120,21 @@ func (q *InsertQuery) getConflict() string {
 		s += " DO NOTHING"
 	}
 
-	return s
+	return s, nil
 }
 
-func (q *InsertQuery) getUpdate() string {
+func (q *InsertQuery) getUpdate() (string, error) {
 	if len(q.update) == 0 || len(q.conflict) == 0 || q.conflictDoNothing {
-		return ""
+		return "", nil
 	}
 
 	s := " DO UPDATE SET "
 
 	for i, st := range q.update {
+		if err := validateIdentifier(st.Column, "update column"); err != nil {
+			return "", err
+		}
+
 		s += st.Column + " = "
 
 		if st.Now {
@@ -138,7 +152,7 @@ func (q *InsertQuery) getUpdate() string {
 		}
 	}
 
-	return s
+	return s, nil
 }
 
 func (q *InsertQuery) getReturns() (string, error) {
@@ -165,8 +179,8 @@ func (q *InsertQuery) getReturns() (string, error) {
 }
 
 func (q *InsertQuery) Get() (string, map[string]any, error) {
-	if q.table == nil {
-		return "", nil, fmt.Errorf("table not set")
+	if err := validateDMLTargetTable(q.table); err != nil {
+		return "", nil, err
 	}
 
 	q.binds = make(map[string]any)
@@ -176,10 +190,20 @@ func (q *InsertQuery) Get() (string, map[string]any, error) {
 		return "", nil, err
 	}
 
+	conflict, err := q.getConflict()
+	if err != nil {
+		return "", nil, err
+	}
+
+	update, err := q.getUpdate()
+	if err != nil {
+		return "", nil, err
+	}
+
 	returns, err := q.getReturns()
 	if err != nil {
 		return "", nil, err
 	}
 
-	return "INSERT INTO " + q.table.Name + " AS " + q.table.Alias + values + q.getConflict() + q.getUpdate() + returns, q.binds, nil
+	return "INSERT INTO " + q.table.Name + " AS " + q.table.Alias + values + conflict + update + returns, q.binds, nil
 }

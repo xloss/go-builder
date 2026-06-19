@@ -183,6 +183,43 @@ func TestDeleteQuery_Get(t *testing.T) {
 	}
 }
 
+func TestDeleteQuery_GetInvalidTableName(t *testing.T) {
+	table := NewTable("bad table")
+
+	q := NewDelete(table)
+	q.Full()
+
+	_, _, err := q.Get()
+	if err == nil {
+		t.Errorf("q.Get should have returned error")
+	}
+}
+
+func TestDeleteQuery_GetInvalidTableAlias(t *testing.T) {
+	table := NewTable("table")
+	table.Alias = "bad alias"
+
+	q := NewDelete(table)
+	q.Full()
+
+	_, _, err := q.Get()
+	if err == nil {
+		t.Errorf("q.Get should have returned error")
+	}
+}
+
+func TestDeleteQuery_GetSubqueryTable(t *testing.T) {
+	table := NewTableSub(NewSelect())
+
+	q := NewDelete(table)
+	q.Full()
+
+	_, _, err := q.Get()
+	if err == nil {
+		t.Errorf("q.Get should have returned error")
+	}
+}
+
 func TestDeleteQuery_GetDoesNotAccumulateBinds(t *testing.T) {
 	table := NewTable("table")
 

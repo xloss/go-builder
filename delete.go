@@ -66,8 +66,8 @@ func (q *DeleteQuery) getWhere() (string, error) {
 }
 
 func (q *DeleteQuery) Get() (string, map[string]any, error) {
-	if q.table == nil {
-		return "", nil, fmt.Errorf("table not set")
+	if err := validateDMLTargetTable(q.table); err != nil {
+		return "", nil, err
 	}
 
 	q.binds = make(map[string]any)

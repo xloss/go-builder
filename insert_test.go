@@ -158,20 +158,47 @@ func TestInsertQuery_getValues(t *testing.T) {
 	}
 }
 
+func TestInsertQuery_getValuesInvalidColumn(t *testing.T) {
+	table := NewTable("table")
+	q := NewInsert(table)
+	q.Value("bad column", 1)
+
+	_, err := q.getValues()
+	if err == nil {
+		t.Errorf("q.getValues should have returned error")
+	}
+}
+
 func TestInsertQuery_getConflict(t *testing.T) {
 	table := NewTable("table")
 	q := NewInsert(table)
 
-	sql := q.getConflict()
+	sql, err := q.getConflict()
+	if err != nil {
+		t.Errorf("q.getConflict() returned %v", err)
+	}
 	if sql != "" {
 		t.Errorf("q.getConflict() returned %v", sql)
 	}
 
 	q.OnConflict("col1", "col2")
-
-	sql = q.getConflict()
+	sql, err = q.getConflict()
+	if err != nil {
+		t.Errorf("q.getConflict() returned %v", err)
+	}
 	if sql != " ON CONFLICT (col1, col2)" {
 		t.Errorf("q.getConflict() returned %v", sql)
+	}
+}
+
+func TestInsertQuery_getConflictInvalidColumn(t *testing.T) {
+	table := NewTable("table")
+	q := NewInsert(table)
+	q.OnConflict("bad column")
+
+	_, err := q.getConflict()
+	if err == nil {
+		t.Errorf("q.getConflict should have returned error")
 	}
 }
 
@@ -179,16 +206,32 @@ func TestInsertQuery_getConflictDoNothing(t *testing.T) {
 	table := NewTable("table")
 	q := NewInsert(table)
 
-	sql := q.getConflict()
+	sql, err := q.getConflict()
+	if err != nil {
+		t.Errorf("q.getConflict() returned %v", err)
+	}
 	if sql != "" {
 		t.Errorf("q.getConflict() returned %v", sql)
 	}
 
 	q.OnConflictDoNothing("col1", "col2")
-
-	sql = q.getConflict()
+	sql, err = q.getConflict()
+	if err != nil {
+		t.Errorf("q.getConflict() returned %v", err)
+	}
 	if sql != " ON CONFLICT (col1, col2) DO NOTHING" {
 		t.Errorf("q.getConflict() returned %v", sql)
+	}
+}
+
+func TestInsertQuery_getConflictDoNothingInvalidColumn(t *testing.T) {
+	table := NewTable("table")
+	q := NewInsert(table)
+	q.OnConflictDoNothing("bad column")
+
+	_, err := q.getConflict()
+	if err == nil {
+		t.Errorf("q.getConflict should have returned error")
 	}
 }
 
@@ -196,13 +239,19 @@ func TestInsertQuery_getUpdate(t *testing.T) {
 	table := NewTable("table")
 	q := NewInsert(table)
 
-	sql := q.getUpdate()
+	sql, err := q.getUpdate()
+	if err != nil {
+		t.Errorf("q.getUpdate() returned %v", err)
+	}
 	if sql != "" {
 		t.Errorf("q.getUpdate() returned %v", sql)
 	}
 
 	q.OnConflict("col1")
-	sql = q.getUpdate()
+	sql, err = q.getUpdate()
+	if err != nil {
+		t.Errorf("q.getUpdate() returned %v", err)
+	}
 	if sql != "" {
 		t.Errorf("q.getUpdate() returned %v", sql)
 	}
@@ -210,7 +259,10 @@ func TestInsertQuery_getUpdate(t *testing.T) {
 	q.UpdateSet("col1", "value1")
 	q.UpdateSetNow("col2")
 
-	sql = q.getUpdate()
+	sql, err = q.getUpdate()
+	if err != nil {
+		t.Errorf("q.getUpdate() returned %v", err)
+	}
 
 	var tag string
 
@@ -222,6 +274,18 @@ func TestInsertQuery_getUpdate(t *testing.T) {
 
 	if sql != " DO UPDATE SET col1 = @"+tag+", col2 = NOW()" {
 		t.Errorf("q.getSet() returned '%v'", sql)
+	}
+}
+
+func TestInsertQuery_getUpdateInvalidColumn(t *testing.T) {
+	table := NewTable("table")
+	q := NewInsert(table)
+	q.OnConflict("col1")
+	q.UpdateSet("bad column", 1)
+
+	_, err := q.getUpdate()
+	if err == nil {
+		t.Errorf("q.getUpdate should have returned error")
 	}
 }
 
@@ -317,5 +381,41 @@ func TestInsertQuery_GetDoesNotAccumulateBinds(t *testing.T) {
 
 	if len(q.binds) != 3 {
 		t.Errorf("q.binds should have 3 values")
+	}
+}
+
+func TestInsertQuery_GetInvalidTableName(t *testing.T) {
+	table := NewTable("bad table")
+	q := NewInsert(table)
+	q.Value("col1", 1)
+
+	_, _, err := q.Get()
+	if err == nil {
+		t.Errorf("q.Get should have returned error")
+	}
+}
+
+func TestInsertQuery_GetInvalidTableAlias(t *testing.T) {
+	table := NewTable("table")
+	table.Alias = "bad alias"
+
+	q := NewInsert(table)
+	q.Value("col1", 1)
+
+	_, _, err := q.Get()
+	if err == nil {
+		t.Errorf("q.Get should have returned error")
+	}
+}
+
+func TestInsertQuery_GetSubqueryTable(t *testing.T) {
+	table := NewTableSub(NewSelect())
+
+	q := NewInsert(table)
+	q.Value("col1", 1)
+
+	_, _, err := q.Get()
+	if err == nil {
+		t.Errorf("q.Get should have returned error")
 	}
 }

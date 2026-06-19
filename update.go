@@ -73,6 +73,10 @@ func (q *UpdateQuery) getSet() (string, error) {
 	s := " SET "
 
 	for i, st := range q.sets {
+		if err := validateIdentifier(st.Column, "update column"); err != nil {
+			return "", err
+		}
+
 		s += st.Column + " = "
 
 		if st.Now {
@@ -138,8 +142,8 @@ func (q *UpdateQuery) getReturns() (string, error) {
 }
 
 func (q *UpdateQuery) Get() (string, map[string]any, error) {
-	if q.table == nil {
-		return "", nil, fmt.Errorf("table not set")
+	if err := validateDMLTargetTable(q.table); err != nil {
+		return "", nil, err
 	}
 
 	q.binds = make(map[string]any)
