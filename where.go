@@ -513,12 +513,13 @@ func (w WhereExists) gen(q query) (string, map[string]any, error) {
 	w.Query.isSub = true
 
 	sql, binds, err := w.Query.Get()
-	if err != nil {
-		return "", nil, err
-	}
 
 	w.Query.columns = columns
 	w.Query.isSub = isSub
+
+	if err != nil {
+		return "", nil, err
+	}
 
 	return "EXISTS(" + sql + ")", binds, nil
 }
