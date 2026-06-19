@@ -360,7 +360,7 @@ func (w WhereFullText) gen(q query) (string, map[string]any, error) {
 
 	tag := w.Column + "_" + randStr()
 
-	return "to_tsvector('" + w.Language + "', " + w.Table.Alias + "." + w.Column + ") @@ plainto_tsquery(@" + tag + ")", map[string]any{tag: w.Value}, nil
+	return "to_tsvector('" + w.Language + "', " + w.Table.Alias + "." + w.Column + ") @@ plainto_tsquery('" + w.Language + "', @" + tag + ")", map[string]any{tag: w.Value}, nil
 }
 
 type WhereAnd struct {

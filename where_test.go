@@ -472,7 +472,7 @@ func TestWhereFullText_gen(t *testing.T) {
 		t.Errorf("value is wrong")
 	}
 
-	if sql != "to_tsvector('simple', "+table.Alias+".col) @@ plainto_tsquery(@"+tag+")" {
+	if sql != "to_tsvector('simple', "+table.Alias+".col) @@ plainto_tsquery('simple', @"+tag+")" {
 		t.Errorf("sql is wrong, sql is %s", sql)
 	}
 }
@@ -515,7 +515,11 @@ func TestWhereFullText_genQualifiedLanguage(t *testing.T) {
 	}
 
 	if !strings.Contains(sql, "to_tsvector('public.english'") {
-		t.Errorf("sql should contain qualified language, sql is %s", sql)
+		t.Errorf("sql should contain qualified language in to_tsvector, sql is %s", sql)
+	}
+
+	if !strings.Contains(sql, "plainto_tsquery('public.english'") {
+		t.Errorf("sql should contain qualified language in plainto_tsquery, sql is %s", sql)
 	}
 }
 
