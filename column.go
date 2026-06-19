@@ -185,6 +185,90 @@ func (c ColumnValue) gen(q query) (string, error) {
 	return s, nil
 }
 
+type ColumnMin struct {
+	Table  *Table // required
+	Name   string // required
+	Alias  string // required
+	Filter Where
+}
+
+func (c ColumnMin) gen(q query) (string, error) {
+	if err := q.checkTable(c.Table); err != nil {
+		return "", err
+	}
+
+	if err := validateIdentifier(c.Name, "column name"); err != nil {
+		return "", err
+	}
+
+	if err := validateIdentifier(c.Alias, "column alias"); err != nil {
+		return "", err
+	}
+
+	s := "MIN(" + c.Table.Alias + "." + c.Name + ")"
+
+	if c.Filter != nil {
+		filter, binds, err := c.Filter.gen(q)
+		if err != nil {
+			return "", err
+		}
+
+		if filter != "" {
+			for k, v := range binds {
+				q.addBind(k, v)
+			}
+
+			s += " FILTER (WHERE " + filter + ")"
+		}
+	}
+
+	s += " AS " + c.Alias
+
+	return s, nil
+}
+
+type ColumnMax struct {
+	Table  *Table // required
+	Name   string // required
+	Alias  string // required
+	Filter Where
+}
+
+func (c ColumnMax) gen(q query) (string, error) {
+	if err := q.checkTable(c.Table); err != nil {
+		return "", err
+	}
+
+	if err := validateIdentifier(c.Name, "column name"); err != nil {
+		return "", err
+	}
+
+	if err := validateIdentifier(c.Alias, "column alias"); err != nil {
+		return "", err
+	}
+
+	s := "MAX(" + c.Table.Alias + "." + c.Name + ")"
+
+	if c.Filter != nil {
+		filter, binds, err := c.Filter.gen(q)
+		if err != nil {
+			return "", err
+		}
+
+		if filter != "" {
+			for k, v := range binds {
+				q.addBind(k, v)
+			}
+
+			s += " FILTER (WHERE " + filter + ")"
+		}
+	}
+
+	s += " AS " + c.Alias
+
+	return s, nil
+}
+
 type columnRaw struct {
 	Value string // required
 }

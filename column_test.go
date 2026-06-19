@@ -458,6 +458,130 @@ func TestColumnValue_genInvalidAlias(t *testing.T) {
 	}
 }
 
+func TestColumnMin_gen(t *testing.T) {
+	table := NewTable("table")
+	q := NewSelect()
+	q.From(table)
+
+	c1 := ColumnMin{Table: table, Name: "col1", Alias: "a1"}
+
+	s1, err := c1.gen(q)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if s1 != "MIN("+table.Alias+".col1) AS a1" {
+		t.Fatal(s1)
+	}
+
+	c2 := ColumnMin{
+		Table: table,
+		Name:  "col2",
+		Alias: "a2",
+		Filter: WhereIsNull{
+			Table:  table,
+			Column: "col3",
+		},
+	}
+
+	s2, err := c2.gen(q)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if s2 != "MIN("+table.Alias+".col2) FILTER (WHERE "+table.Alias+".col3 IS NULL) AS a2" {
+		t.Fatal(s2)
+	}
+}
+
+func TestColumnMax_gen(t *testing.T) {
+	table := NewTable("table")
+	q := NewSelect()
+	q.From(table)
+
+	c1 := ColumnMax{Table: table, Name: "col1", Alias: "a1"}
+
+	s1, err := c1.gen(q)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if s1 != "MAX("+table.Alias+".col1) AS a1" {
+		t.Fatal(s1)
+	}
+
+	c2 := ColumnMax{
+		Table: table,
+		Name:  "col2",
+		Alias: "a2",
+		Filter: WhereIsNotNull{
+			Table:  table,
+			Column: "col3",
+		},
+	}
+
+	s2, err := c2.gen(q)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if s2 != "MAX("+table.Alias+".col2) FILTER (WHERE "+table.Alias+".col3 IS NOT NULL) AS a2" {
+		t.Fatal(s2)
+	}
+}
+
+func TestColumnMin_genInvalidName(t *testing.T) {
+	table := NewTable("table")
+	q := NewSelect()
+	q.From(table)
+
+	c := ColumnMin{Table: table, Name: "bad name", Alias: "a1"}
+
+	_, err := c.gen(q)
+	if err == nil {
+		t.Errorf("c.gen should have returned error")
+	}
+}
+
+func TestColumnMin_genInvalidAlias(t *testing.T) {
+	table := NewTable("table")
+	q := NewSelect()
+	q.From(table)
+
+	c := ColumnMin{Table: table, Name: "col", Alias: "bad alias"}
+
+	_, err := c.gen(q)
+	if err == nil {
+		t.Errorf("c.gen should have returned error")
+	}
+}
+
+func TestColumnMax_genInvalidName(t *testing.T) {
+	table := NewTable("table")
+	q := NewSelect()
+	q.From(table)
+
+	c := ColumnMax{Table: table, Name: "bad name", Alias: "a1"}
+
+	_, err := c.gen(q)
+	if err == nil {
+		t.Errorf("c.gen should have returned error")
+	}
+}
+
+func TestColumnMax_genInvalidAlias(t *testing.T) {
+	table := NewTable("table")
+	q := NewSelect()
+	q.From(table)
+
+	c := ColumnMax{Table: table, Name: "col", Alias: "bad alias"}
+
+	_, err := c.gen(q)
+	if err == nil {
+		t.Errorf("c.gen should have returned error")
+	}
+}
+
 func ExampleColumnName() {
 	table1 := NewTable("table1")
 	query1 := NewSelect()

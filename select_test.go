@@ -691,6 +691,49 @@ func TestSelectQuery_GetCountFilter(t *testing.T) {
 	}
 }
 
+func TestSelectQuery_GetMinMaxFilter(t *testing.T) {
+	table := NewTable("table")
+
+	sql, binds, err := NewSelect().
+		From(table).
+		Column(ColumnMin{
+			Table: table,
+			Name:  "col1",
+			Alias: "a1",
+			Filter: WhereIsNull{
+				Table:  table,
+				Column: "col2",
+			},
+		}).
+		Column(ColumnMax{
+			Table: table,
+			Name:  "col3",
+			Alias: "a2",
+			Filter: WhereIsNotNull{
+				Table:  table,
+				Column: "col4",
+			},
+		}).
+		Get()
+	if err != nil {
+		t.Errorf("q.Get should not have returned error. return: %e", err)
+	}
+
+	if len(binds) != 0 {
+		t.Errorf("binds should have 0 values")
+	}
+
+	st := fmt.Sprintf(
+		"SELECT MIN(%[1]s.col1) FILTER (WHERE %[1]s.col2 IS NULL) AS a1, MAX(%[1]s.col3) FILTER (WHERE %[1]s.col4 IS NOT NULL) AS a2 FROM %[2]s AS %[1]s",
+		table.Alias,
+		table.Name,
+	)
+
+	if sql != st {
+		t.Errorf("bad returned sql. return:\n'%s'\n'%s'", sql, st)
+	}
+}
+
 func ExampleNewSelect() {
 	table1 := NewTable("table1")
 	query1 := NewSelect()
