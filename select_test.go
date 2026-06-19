@@ -2,6 +2,7 @@ package builder
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -573,6 +574,35 @@ func TestSelectQuery_GetDoesNotAccumulateBinds(t *testing.T) {
 
 	if len(q.binds) != 3 {
 		t.Errorf("q.binds should have 3 values")
+	}
+}
+
+func TestSelectQuery_GetIncludesJoinUsedOnlyInGroup(t *testing.T) {
+	table1 := NewTable("table1")
+	table2 := NewTable("table2")
+
+	q := NewSelect()
+	q.From(table1)
+	q.LeftJoin(table2, OnEq{
+		Table1:  table1,
+		Column1: "id",
+		Table2:  table2,
+		Column2: "table_id",
+	})
+	q.Column(ColumnName{Table: table1, Name: "col1"})
+	q.Group(GroupColumn{Table: table2, Column: "col2"})
+
+	sql, _, err := q.Get()
+	if err != nil {
+		t.Errorf("q.Get should not have returned error. return: %e", err)
+	}
+
+	if !strings.Contains(sql, " LEFT JOIN "+table2.Name+" AS "+table2.Alias+" ON ") {
+		t.Errorf("sql should contain join, sql is %s", sql)
+	}
+
+	if !strings.Contains(sql, " GROUP BY "+table2.Alias+".col2") {
+		t.Errorf("sql should contain group by joined table, sql is %s", sql)
 	}
 }
 

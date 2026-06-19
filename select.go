@@ -304,12 +304,12 @@ func (q *SelectQuery) Get() (string, map[string]any, error) {
 		return "", nil, err
 	}
 
-	j, err := q.getJoin()
+	group, err := q.getGroup()
 	if err != nil {
 		return "", nil, err
 	}
 
-	group, err := q.getGroup()
+	j, err := q.getJoin()
 	if err != nil {
 		return "", nil, err
 	}
