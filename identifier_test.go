@@ -92,3 +92,17 @@ func TestTableAlias(t *testing.T) {
 		t.Errorf("alias prefix is wrong")
 	}
 }
+
+func TestValidateIdentifierIfNotEmpty(t *testing.T) {
+	if err := validateIdentifierIfNotEmpty("", "field"); err != nil {
+		t.Errorf("validateIdentifierIfNotEmpty should not have returned error. return: %e", err)
+	}
+
+	if err := validateIdentifierIfNotEmpty("field1", "field"); err != nil {
+		t.Errorf("validateIdentifierIfNotEmpty should not have returned error. return: %e", err)
+	}
+
+	if err := validateIdentifierIfNotEmpty("bad field", "field"); err == nil {
+		t.Errorf("validateIdentifierIfNotEmpty should have returned error")
+	}
+}

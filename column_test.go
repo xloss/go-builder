@@ -292,6 +292,119 @@ func TestColumnValue_genDoesNotInlineString(t *testing.T) {
 	}
 }
 
+func TestColumnName_genInvalidName(t *testing.T) {
+	table := NewTable("table")
+	q := NewSelect()
+	q.From(table)
+
+	c := ColumnName{Table: table, Name: "bad name"}
+
+	_, err := c.gen(q)
+	if err == nil {
+		t.Errorf("c.gen should have returned error")
+	}
+}
+
+func TestColumnName_genInvalidAlias(t *testing.T) {
+	table := NewTable("table")
+	q := NewSelect()
+	q.From(table)
+
+	c := ColumnName{Table: table, Name: "col", Alias: "bad alias"}
+
+	_, err := c.gen(q)
+	if err == nil {
+		t.Errorf("c.gen should have returned error")
+	}
+}
+
+func TestColumnCount_genInvalidName(t *testing.T) {
+	table := NewTable("table")
+	q := NewSelect()
+	q.From(table)
+
+	c := ColumnCount{Table: table, Name: "bad name", Alias: "a1"}
+
+	_, err := c.gen(q)
+	if err == nil {
+		t.Errorf("c.gen should have returned error")
+	}
+}
+
+func TestColumnCount_genInvalidAlias(t *testing.T) {
+	q := NewSelect()
+
+	c := ColumnCount{Alias: "bad alias"}
+
+	_, err := c.gen(q)
+	if err == nil {
+		t.Errorf("c.gen should have returned error")
+	}
+}
+
+func TestColumnCoalesce_genInvalidName(t *testing.T) {
+	table := NewTable("table")
+	q := NewSelect()
+	q.From(table)
+
+	c := ColumnCoalesce{Table: table, Name: "bad name", Alias: "a1", Default: 1}
+
+	_, err := c.gen(q)
+	if err == nil {
+		t.Errorf("c.gen should have returned error")
+	}
+}
+
+func TestColumnCoalesce_genInvalidAlias(t *testing.T) {
+	table := NewTable("table")
+	q := NewSelect()
+	q.From(table)
+
+	c := ColumnCoalesce{Table: table, Name: "col", Alias: "bad alias", Default: 1}
+
+	_, err := c.gen(q)
+	if err == nil {
+		t.Errorf("c.gen should have returned error")
+	}
+}
+
+func TestColumnJsonbArrayElementsText_genInvalidName(t *testing.T) {
+	table := NewTable("table")
+	q := NewSelect()
+	q.From(table)
+
+	c := ColumnJsonbArrayElementsText{Table: table, Name: "bad name", Alias: "a1"}
+
+	_, err := c.gen(q)
+	if err == nil {
+		t.Errorf("c.gen should have returned error")
+	}
+}
+
+func TestColumnJsonbArrayElementsText_genInvalidAlias(t *testing.T) {
+	table := NewTable("table")
+	q := NewSelect()
+	q.From(table)
+
+	c := ColumnJsonbArrayElementsText{Table: table, Name: "col", Alias: "bad alias"}
+
+	_, err := c.gen(q)
+	if err == nil {
+		t.Errorf("c.gen should have returned error")
+	}
+}
+
+func TestColumnValue_genInvalidAlias(t *testing.T) {
+	q := NewSelect()
+
+	c := ColumnValue{Value: 1, Alias: "bad alias"}
+
+	_, err := c.gen(q)
+	if err == nil {
+		t.Errorf("c.gen should have returned error")
+	}
+}
+
 func ExampleColumnName() {
 	table1 := NewTable("table1")
 	query1 := NewSelect()

@@ -67,3 +67,11 @@ func isIdentifierDigit(r rune) bool {
 func tableAlias(name string) string {
 	return strings.ReplaceAll(name, ".", "_") + "_" + randStr()
 }
+
+func validateIdentifierIfNotEmpty(name, field string) error {
+	if name == "" {
+		return nil
+	}
+
+	return validateIdentifier(name, field)
+}

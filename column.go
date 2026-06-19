@@ -20,12 +20,15 @@ func (c ColumnName) gen(q query) (string, error) {
 		return "", err
 	}
 
-	if c.Name == "" {
-		return "", fmt.Errorf("name is empty")
+	if err := validateIdentifier(c.Name, "column name"); err != nil {
+		return "", err
+	}
+
+	if err := validateIdentifierIfNotEmpty(c.Alias, "column alias"); err != nil {
+		return "", err
 	}
 
 	s := ""
-
 	if c.Distinct {
 		s += "DISTINCT "
 	}
@@ -47,14 +50,18 @@ type ColumnCount struct {
 }
 
 func (c ColumnCount) gen(q query) (string, error) {
-	if c.Alias == "" {
-		return "", fmt.Errorf("alias is empty")
+	if err := validateIdentifier(c.Alias, "column alias"); err != nil {
+		return "", err
 	}
 
 	s := "COUNT("
 
 	if c.Name != "" {
 		if err := q.checkTable(c.Table); err != nil {
+			return "", err
+		}
+
+		if err := validateIdentifier(c.Name, "column name"); err != nil {
 			return "", err
 		}
 
@@ -83,12 +90,15 @@ func (c ColumnCoalesce) gen(q query) (string, error) {
 	if err := q.checkTable(c.Table); err != nil {
 		return "", err
 	}
-	if c.Name == "" {
-		return "", fmt.Errorf("name is empty")
+
+	if err := validateIdentifier(c.Name, "column name"); err != nil {
+		return "", err
 	}
-	if c.Alias == "" {
-		return "", fmt.Errorf("alias is empty")
+
+	if err := validateIdentifier(c.Alias, "column alias"); err != nil {
+		return "", err
 	}
+
 	if c.Default == nil {
 		return "", fmt.Errorf("default is empty")
 	}
@@ -111,16 +121,15 @@ func (c ColumnJsonbArrayElementsText) gen(q query) (string, error) {
 		return "", err
 	}
 
-	if c.Name == "" {
-		return "", fmt.Errorf("name is empty")
+	if err := validateIdentifier(c.Name, "column name"); err != nil {
+		return "", err
 	}
 
-	if c.Alias == "" {
-		return "", fmt.Errorf("alias is empty")
+	if err := validateIdentifier(c.Alias, "column alias"); err != nil {
+		return "", err
 	}
 
 	s := ""
-
 	if c.Distinct {
 		s += "DISTINCT "
 	}
@@ -140,6 +149,10 @@ func (c ColumnValue) gen(q query) (string, error) {
 
 	if c.Value == nil {
 		return "", fmt.Errorf("value is empty")
+	}
+
+	if err := validateIdentifierIfNotEmpty(c.Alias, "column alias"); err != nil {
+		return "", err
 	}
 
 	tag := "value_" + randStr()
