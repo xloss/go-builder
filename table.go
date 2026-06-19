@@ -21,7 +21,15 @@ func (t Table) gen() (string, map[string]any, error) {
 
 		s = "(" + s + ")"
 	} else {
+		if errValidate := validateQualifiedIdentifier(t.Name, "table name"); errValidate != nil {
+			return "", nil, errValidate
+		}
+
 		s = t.Name
+	}
+
+	if errValidate := validateIdentifier(t.Alias, "table alias"); errValidate != nil {
+		return "", nil, errValidate
 	}
 
 	s = s + " AS " + t.Alias
@@ -33,7 +41,7 @@ func (t Table) gen() (string, map[string]any, error) {
 func NewTable(name string) *Table {
 	return &Table{
 		Name:  name,
-		Alias: name + "_" + randStr(),
+		Alias: tableAlias(name),
 	}
 }
 

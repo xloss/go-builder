@@ -13,7 +13,7 @@ func TestNewTable(t *testing.T) {
 		t.Errorf("table name is wrong")
 	}
 
-	if strings.HasPrefix("test_table_", table.Alias) {
+	if !strings.HasPrefix(table.Alias, "test_table_") {
 		t.Errorf("table alias is wrong")
 	}
 
@@ -80,6 +80,64 @@ func TestName(t *testing.T) {
 	_, _, err := q2.Get()
 	if err != nil {
 		t.Error(err)
+	}
+}
+
+func TestNewTableQualifiedName(t *testing.T) {
+	table := NewTable("public.table")
+
+	if table.Name != "public.table" {
+		t.Errorf("table name is wrong")
+	}
+
+	if !strings.HasPrefix(table.Alias, "public_table_") {
+		t.Errorf("table alias is wrong")
+	}
+}
+
+func TestTable_genQualifiedName(t *testing.T) {
+	table := NewTable("public.table")
+
+	sql, binds, err := table.gen()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(binds) != 0 {
+		t.Errorf("table bind length is wrong")
+	}
+
+	if sql != "public.table AS "+table.Alias {
+		t.Errorf("table sql is wrong, sql is '%s'", sql)
+	}
+}
+
+func TestTable_genInvalidName(t *testing.T) {
+	table := NewTable("table;DROP")
+
+	_, _, err := table.gen()
+	if err == nil {
+		t.Errorf("table.gen should have returned error")
+	}
+}
+
+func TestTable_genInvalidAlias(t *testing.T) {
+	table := NewTable("table")
+	table.Alias = "bad alias"
+
+	_, _, err := table.gen()
+	if err == nil {
+		t.Errorf("table.gen should have returned error")
+	}
+}
+
+func TestTable_genInvalidSubAlias(t *testing.T) {
+	table := NewTableSub(NewSelect())
+	table.Alias = "bad alias"
+
+	_, _, err := table.gen()
+	if err == nil {
+		t.Errorf("table.gen should have returned error")
 	}
 }
 
