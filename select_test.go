@@ -229,10 +229,18 @@ func TestSelectQuery_getSelect(t *testing.T) {
 	q.Column(ColumnCoalesce{Table: table2, Name: "col2", Alias: "a1", Default: 10})
 
 	s, err := q.getSelect()
+
+	var c string
+	for d, v := range q.binds {
+		if v == 10 {
+			c = d
+		}
+	}
+
 	if err != nil {
 		t.Errorf("q.getSelect should not have returned error. return: %e", err)
 	}
-	if s != fmt.Sprintf("SELECT %[1]s.col1, COALESCE(%[2]s.col2, 10) AS a1", table1.Alias, table2.Alias) {
+	if s != fmt.Sprintf("SELECT %[1]s.col1, COALESCE(%[2]s.col2, @%[3]s) AS a1", table1.Alias, table2.Alias, c) {
 		t.Errorf("bad returned select. return %s", s)
 	}
 }

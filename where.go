@@ -414,8 +414,12 @@ func (w WhereExists) gen(q query) (string, map[string]any, error) {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
 
+	if w.Query == nil {
+		return "", nil, fmt.Errorf("exists query cannot be nil")
+	}
+
 	w.Query.IsSub()
-	w.Query.Column(ColumnValue{Value: 1})
+	w.Query.Column(columnRaw{Value: "1"})
 
 	sql, binds, err := w.Query.Get()
 	if err != nil {

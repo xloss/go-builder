@@ -83,29 +83,20 @@ func (c ColumnCoalesce) gen(q query) (string, error) {
 	if err := q.checkTable(c.Table); err != nil {
 		return "", err
 	}
-
 	if c.Name == "" {
 		return "", fmt.Errorf("name is empty")
 	}
-
 	if c.Alias == "" {
 		return "", fmt.Errorf("alias is empty")
 	}
-
 	if c.Default == nil {
 		return "", fmt.Errorf("default is empty")
 	}
 
-	d := ""
+	tag := c.Name + "_default_" + randStr()
+	q.addBind(tag, c.Default)
 
-	switch c.Default.(type) {
-	case string:
-		d = "'" + c.Default.(string) + "'"
-	default:
-		d = fmt.Sprintf("%v", c.Default)
-	}
-
-	return "COALESCE(" + c.Table.Alias + "." + c.Name + ", " + d + ") AS " + c.Alias, nil
+	return "COALESCE(" + c.Table.Alias + "." + c.Name + ", @" + tag + ") AS " + c.Alias, nil
 }
 
 type ColumnJsonbArrayElementsText struct {
@@ -142,23 +133,35 @@ type ColumnValue struct {
 	Alias string
 }
 
-func (c ColumnValue) gen(_ query) (string, error) {
+func (c ColumnValue) gen(q query) (string, error) {
+	if q == nil {
+		return "", fmt.Errorf("query cannot be nil")
+	}
+
 	if c.Value == nil {
 		return "", fmt.Errorf("value is empty")
 	}
 
-	s := ""
+	tag := "value_" + randStr()
+	q.addBind(tag, c.Value)
 
-	switch c.Value.(type) {
-	case string:
-		s = fmt.Sprintf("'%s'", c.Value)
-	default:
-		s = fmt.Sprintf("%v", c.Value)
-	}
+	s := "@" + tag
 
 	if c.Alias != "" {
 		s += " AS " + c.Alias
 	}
 
 	return s, nil
+}
+
+type columnRaw struct {
+	Value string // required
+}
+
+func (c columnRaw) gen(_ query) (string, error) {
+	if c.Value == "" {
+		return "", fmt.Errorf("value is empty")
+	}
+
+	return c.Value, nil
 }

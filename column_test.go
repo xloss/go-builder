@@ -2,6 +2,7 @@ package builder
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -120,16 +121,40 @@ func TestColumnCoalesce_gen(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if sql != "COALESCE("+table.Alias+".col1, 10) AS a1" {
+
+	var tag string
+	for k, v := range q.binds {
+		if v == 10 {
+			tag = k
+		}
+	}
+
+	if tag == "" {
+		t.Fatal("tag should not be empty")
+	}
+
+	if sql != "COALESCE("+table.Alias+".col1, @"+tag+") AS a1" {
 		t.Fatal(sql)
 	}
 
-	c.Default = "str"
+	c.Default = "O'Reilly"
 	sql, err = c.gen(q)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if sql != "COALESCE("+table.Alias+".col1, 'str') AS a1" {
+
+	tag = ""
+	for k, v := range q.binds {
+		if v == "O'Reilly" {
+			tag = k
+		}
+	}
+
+	if tag == "" {
+		t.Fatal("tag should not be empty")
+	}
+
+	if sql != "COALESCE("+table.Alias+".col1, @"+tag+") AS a1" {
 		t.Fatal(sql)
 	}
 }
@@ -191,14 +216,26 @@ func TestColumnValue_gen(t *testing.T) {
 	q.From(table)
 
 	c1 := ColumnValue{Value: 1}
-	c2 := ColumnValue{Value: "1", Alias: "a1"}
+	c2 := ColumnValue{Value: "O'Reilly", Alias: "a1"}
 	c3 := ColumnValue{}
 
 	s1, err := c1.gen(q)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if s1 != "1" {
+
+	var tag1 string
+	for k, v := range q.binds {
+		if v == 1 {
+			tag1 = k
+		}
+	}
+
+	if tag1 == "" {
+		t.Fatal("tag1 should not be empty")
+	}
+
+	if s1 != "@"+tag1 {
 		t.Fatal(s1)
 	}
 
@@ -206,13 +243,52 @@ func TestColumnValue_gen(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if s2 != "'1' AS a1" {
+
+	var tag2 string
+	for k, v := range q.binds {
+		if v == "O'Reilly" {
+			tag2 = k
+		}
+	}
+
+	if tag2 == "" {
+		t.Fatal("tag2 should not be empty")
+	}
+
+	if s2 != "@"+tag2+" AS a1" {
 		t.Fatal(s2)
 	}
 
 	_, err = c3.gen(q)
 	if err == nil {
 		t.Error("expected error")
+	}
+}
+
+func TestColumnValue_genDoesNotInlineString(t *testing.T) {
+	table := NewTable("table")
+
+	q := NewSelect().
+		From(table).
+		Column(ColumnValue{Value: "O'Reilly", Alias: "value"})
+
+	sql, binds, err := q.Get()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(binds) != 1 {
+		t.Fatalf("binds should have 1 value")
+	}
+
+	if strings.Contains(sql, "O'Reilly") {
+		t.Fatalf("sql should not contain raw string value: %s", sql)
+	}
+
+	for _, v := range binds {
+		if v != "O'Reilly" {
+			t.Fatalf("bind value should have O'Reilly")
+		}
 	}
 }
 
