@@ -24,6 +24,10 @@ func (w WhereEq) gen(q query) (string, map[string]any, error) {
 		return "", nil, err
 	}
 
+	if err := validateIdentifier(w.Column, "where column"); err != nil {
+		return "", nil, err
+	}
+
 	tag := w.Column + "_" + randStr()
 
 	return w.Table.Alias + "." + w.Column + " = @" + tag, map[string]any{tag: w.Value}, nil
@@ -41,6 +45,10 @@ func (w WhereNotEq) gen(q query) (string, map[string]any, error) {
 	}
 
 	if err := q.checkTable(w.Table); err != nil {
+		return "", nil, err
+	}
+
+	if err := validateIdentifier(w.Column, "where column"); err != nil {
 		return "", nil, err
 	}
 
@@ -69,6 +77,14 @@ func (w WhereEqColumn) gen(q query) (string, map[string]any, error) {
 		return "", nil, err
 	}
 
+	if err := validateIdentifier(w.Column1, "where column"); err != nil {
+		return "", nil, err
+	}
+
+	if err := validateIdentifier(w.Column2, "where column"); err != nil {
+		return "", nil, err
+	}
+
 	return w.Table1.Alias + "." + w.Column1 + " = " + w.Table2.Alias + "." + w.Column2, nil, nil
 }
 
@@ -92,6 +108,14 @@ func (w WhereNotEqColumn) gen(q query) (string, map[string]any, error) {
 		return "", nil, err
 	}
 
+	if err := validateIdentifier(w.Column1, "where column"); err != nil {
+		return "", nil, err
+	}
+
+	if err := validateIdentifier(w.Column2, "where column"); err != nil {
+		return "", nil, err
+	}
+
 	return w.Table1.Alias + "." + w.Column1 + " <> " + w.Table2.Alias + "." + w.Column2, nil, nil
 }
 
@@ -106,6 +130,10 @@ func (w WhereIsNull) gen(q query) (string, map[string]any, error) {
 	}
 
 	if err := q.checkTable(w.Table); err != nil {
+		return "", nil, err
+	}
+
+	if err := validateIdentifier(w.Column, "where column"); err != nil {
 		return "", nil, err
 	}
 
@@ -126,6 +154,10 @@ func (w WhereIsNotNull) gen(q query) (string, map[string]any, error) {
 		return "", nil, err
 	}
 
+	if err := validateIdentifier(w.Column, "where column"); err != nil {
+		return "", nil, err
+	}
+
 	return w.Table.Alias + "." + w.Column + " IS NOT NULL", nil, nil
 }
 
@@ -141,6 +173,10 @@ func (w WhereIn) gen(q query) (string, map[string]any, error) {
 	}
 
 	if err := q.checkTable(w.Table); err != nil {
+		return "", nil, err
+	}
+
+	if err := validateIdentifier(w.Column, "where column"); err != nil {
 		return "", nil, err
 	}
 
@@ -164,6 +200,10 @@ func (w WhereMore) gen(q query) (string, map[string]any, error) {
 		return "", nil, err
 	}
 
+	if err := validateIdentifier(w.Column, "where column"); err != nil {
+		return "", nil, err
+	}
+
 	tag := w.Column + "_" + randStr()
 
 	return w.Table.Alias + "." + w.Column + " > @" + tag, map[string]any{tag: w.Value}, nil
@@ -181,6 +221,10 @@ func (w WhereLess) gen(q query) (string, map[string]any, error) {
 	}
 
 	if err := q.checkTable(w.Table); err != nil {
+		return "", nil, err
+	}
+
+	if err := validateIdentifier(w.Column, "where column"); err != nil {
 		return "", nil, err
 	}
 
@@ -206,6 +250,10 @@ func (w WhereMoreEq) gen(q query) (string, map[string]any, error) {
 		return "", nil, err
 	}
 
+	if err := validateIdentifier(w.Column, "where column"); err != nil {
+		return "", nil, err
+	}
+
 	tag := w.Column + "_" + randStr()
 
 	q.addBind(tag, w.Value)
@@ -225,6 +273,10 @@ func (w WhereLessEq) gen(q query) (string, map[string]any, error) {
 	}
 
 	if err := q.checkTable(w.Table); err != nil {
+		return "", nil, err
+	}
+
+	if err := validateIdentifier(w.Column, "where column"); err != nil {
 		return "", nil, err
 	}
 
@@ -253,6 +305,14 @@ func (w WhereMoreColumn) gen(q query) (string, map[string]any, error) {
 		return "", nil, err
 	}
 
+	if err := validateIdentifier(w.Column1, "where column"); err != nil {
+		return "", nil, err
+	}
+
+	if err := validateIdentifier(w.Column2, "where column"); err != nil {
+		return "", nil, err
+	}
+
 	return w.Table1.Alias + "." + w.Column1 + " > " + w.Table2.Alias + "." + w.Column2, map[string]any{}, nil
 }
 
@@ -268,6 +328,10 @@ func (w WhereILike) gen(q query) (string, map[string]any, error) {
 	}
 
 	if err := q.checkTable(w.Table); err != nil {
+		return "", nil, err
+	}
+
+	if err := validateIdentifier(w.Column, "where column"); err != nil {
 		return "", nil, err
 	}
 
@@ -289,6 +353,14 @@ func (w WhereFullText) gen(q query) (string, map[string]any, error) {
 	}
 
 	if err := q.checkTable(w.Table); err != nil {
+		return "", nil, err
+	}
+
+	if err := validateIdentifier(w.Column, "where column"); err != nil {
+		return "", nil, err
+	}
+
+	if err := validateQualifiedIdentifier(w.Language, "full text language"); err != nil {
 		return "", nil, err
 	}
 
@@ -316,6 +388,10 @@ func (w WhereAnd) gen(q query) (string, map[string]any, error) {
 	)
 
 	for i, where := range w.List {
+		if where == nil {
+			return "", nil, fmt.Errorf("where cannot be nil")
+		}
+
 		sql, bind, err := where.gen(q)
 		if err != nil {
 			return "", nil, err
@@ -350,6 +426,10 @@ func (w WhereOr) gen(q query) (string, map[string]any, error) {
 	)
 
 	for i, where := range w.List {
+		if where == nil {
+			return "", nil, fmt.Errorf("where cannot be nil")
+		}
+
 		sql, bind, err := where.gen(q)
 		if err != nil {
 			return "", nil, err
@@ -380,6 +460,10 @@ func (w WhereJsonbTextExist) gen(q query) (string, map[string]any, error) {
 		return "", nil, err
 	}
 
+	if err := validateIdentifier(w.Column, "where column"); err != nil {
+		return "", nil, err
+	}
+
 	tag := w.Column + "_" + randStr()
 
 	return w.Table.Alias + "." + w.Column + " ? @" + tag, map[string]any{tag: w.Value}, nil
@@ -397,6 +481,10 @@ func (w WhereJsonbTextInExist) gen(q query) (string, map[string]any, error) {
 	}
 
 	if err := q.checkTable(w.Table); err != nil {
+		return "", nil, err
+	}
+
+	if err := validateIdentifier(w.Column, "where column"); err != nil {
 		return "", nil, err
 	}
 

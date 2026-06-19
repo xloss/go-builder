@@ -1,6 +1,7 @@
 package builder
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -476,6 +477,48 @@ func TestWhereFullText_gen(t *testing.T) {
 	}
 }
 
+func TestWhereFullText_genInvalidLanguage(t *testing.T) {
+	table := NewTable("table")
+	q := NewSelect()
+	q.From(table)
+
+	list := []WhereFullText{
+		{Table: table, Column: "col", Language: "bad language", Value: "value"},
+		{Table: table, Column: "col", Language: "english'); DROP TABLE users; --", Value: "value"},
+		{Table: table, Column: "col", Language: ".english", Value: "value"},
+		{Table: table, Column: "col", Language: "public.", Value: "value"},
+	}
+
+	for _, where := range list {
+		_, _, err := where.gen(q)
+		if err == nil {
+			t.Errorf("where.gen should have returned error")
+		}
+	}
+}
+
+func TestWhereFullText_genQualifiedLanguage(t *testing.T) {
+	table := NewTable("table")
+	q := NewSelect()
+	q.From(table)
+
+	where := WhereFullText{
+		Table:    table,
+		Column:   "col",
+		Language: "public.english",
+		Value:    "value",
+	}
+
+	sql, _, err := where.gen(q)
+	if err != nil {
+		t.Errorf("where.gen should not have returned error. return: %e", err)
+	}
+
+	if !strings.Contains(sql, "to_tsvector('public.english'") {
+		t.Errorf("sql should contain qualified language, sql is %s", sql)
+	}
+}
+
 func TestWhereAnd_gen(t *testing.T) {
 	table := NewTable("table")
 	q := NewSelect()
@@ -522,6 +565,17 @@ func TestWhereAnd_gen(t *testing.T) {
 	}
 }
 
+func TestWhereAnd_genNilWhere(t *testing.T) {
+	q := NewSelect()
+
+	where := WhereAnd{List: []Where{nil}}
+
+	_, _, err := where.gen(q)
+	if err == nil {
+		t.Errorf("where.gen should have returned error")
+	}
+}
+
 func TestWhereOr_gen(t *testing.T) {
 	table := NewTable("table")
 	q := NewSelect()
@@ -565,6 +619,17 @@ func TestWhereOr_gen(t *testing.T) {
 
 	if sql != "("+table.Alias+".col1 = @"+tag1+" OR "+table.Alias+".col1 = @"+tag2+")" {
 		t.Errorf("wrong sql: %s", sql)
+	}
+}
+
+func TestWhereOr_genNilWhere(t *testing.T) {
+	q := NewSelect()
+
+	where := WhereOr{List: []Where{nil}}
+
+	_, _, err := where.gen(q)
+	if err == nil {
+		t.Errorf("where.gen should have returned error")
 	}
 }
 
@@ -688,5 +753,40 @@ func TestWhereExists_gen(t *testing.T) {
 
 	if sql != "EXISTS(SELECT 1 FROM table2 AS "+table2.Alias+" WHERE ("+table2.Alias+".col1 = @"+tag+" AND "+table1.Alias+".col3 = "+table2.Alias+".col2))" {
 		t.Errorf("sql is wrong, sql is %s", sql)
+	}
+}
+
+func TestWhere_genInvalidColumn(t *testing.T) {
+	table := NewTable("table")
+	q := NewSelect()
+	q.From(table)
+
+	list := []Where{
+		WhereEq{Table: table, Column: "bad column", Value: 1},
+		WhereNotEq{Table: table, Column: "bad column", Value: 1},
+		WhereEqColumn{Table1: table, Column1: "bad column", Table2: table, Column2: "col2"},
+		WhereEqColumn{Table1: table, Column1: "col1", Table2: table, Column2: "bad column"},
+		WhereNotEqColumn{Table1: table, Column1: "bad column", Table2: table, Column2: "col2"},
+		WhereNotEqColumn{Table1: table, Column1: "col1", Table2: table, Column2: "bad column"},
+		WhereIsNull{Table: table, Column: "bad column"},
+		WhereIsNotNull{Table: table, Column: "bad column"},
+		WhereIn{Table: table, Column: "bad column", Values: []int{1, 2}},
+		WhereMore{Table: table, Column: "bad column", Value: 1},
+		WhereLess{Table: table, Column: "bad column", Value: 1},
+		WhereMoreEq{Table: table, Column: "bad column", Value: 1},
+		WhereLessEq{Table: table, Column: "bad column", Value: 1},
+		WhereMoreColumn{Table1: table, Column1: "bad column", Table2: table, Column2: "col2"},
+		WhereMoreColumn{Table1: table, Column1: "col1", Table2: table, Column2: "bad column"},
+		WhereILike{Table: table, Column: "bad column", Value: "value"},
+		WhereFullText{Table: table, Column: "bad column", Language: "english", Value: "value"},
+		WhereJsonbTextExist{Table: table, Column: "bad column", Value: "value"},
+		WhereJsonbTextInExist{Table: table, Column: "bad column", Values: []string{"value"}},
+	}
+
+	for _, where := range list {
+		_, _, err := where.gen(q)
+		if err == nil {
+			t.Errorf("where.gen should have returned error")
+		}
 	}
 }

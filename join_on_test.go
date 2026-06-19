@@ -111,3 +111,36 @@ func TestOnAnd_gen(t *testing.T) {
 	}
 
 }
+
+func TestOnAnd_genNilOn(t *testing.T) {
+	q := NewSelect()
+
+	on := OnAnd{List: []On{nil}}
+
+	_, err := on.gen(q)
+	if err == nil {
+		t.Errorf("on.gen should have returned error")
+	}
+}
+
+func TestOn_genInvalidColumn(t *testing.T) {
+	table := NewTable("table")
+	q := NewSelect()
+	q.From(table)
+
+	list := []On{
+		OnEq{Table1: table, Column1: "bad column", Table2: table, Column2: "col2"},
+		OnEq{Table1: table, Column1: "col1", Table2: table, Column2: "bad column"},
+		OnLess{Table1: table, Column1: "bad column", Table2: table, Column2: "col2"},
+		OnLess{Table1: table, Column1: "col1", Table2: table, Column2: "bad column"},
+		OnMore{Table1: table, Column1: "bad column", Table2: table, Column2: "col2"},
+		OnMore{Table1: table, Column1: "col1", Table2: table, Column2: "bad column"},
+	}
+
+	for _, on := range list {
+		_, err := on.gen(q)
+		if err == nil {
+			t.Errorf("on.gen should have returned error")
+		}
+	}
+}

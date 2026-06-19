@@ -25,6 +25,10 @@ func (o OnAnd) gen(q query) (string, error) {
 	list := make([]string, len(o.List))
 
 	for i, on := range o.List {
+		if on == nil {
+			return "", fmt.Errorf("on cannot be nil")
+		}
+
 		sql, err := on.gen(q)
 		if err != nil {
 			return "", err
@@ -56,6 +60,14 @@ func (o OnEq) gen(q query) (string, error) {
 		return "", err
 	}
 
+	if err := validateIdentifier(o.Column1, "on column"); err != nil {
+		return "", err
+	}
+
+	if err := validateIdentifier(o.Column2, "on column"); err != nil {
+		return "", err
+	}
+
 	return o.Table1.Alias + "." + o.Column1 + " = " + o.Table2.Alias + "." + o.Column2, nil
 }
 
@@ -79,6 +91,14 @@ func (o OnLess) gen(q query) (string, error) {
 		return "", err
 	}
 
+	if err := validateIdentifier(o.Column1, "on column"); err != nil {
+		return "", err
+	}
+
+	if err := validateIdentifier(o.Column2, "on column"); err != nil {
+		return "", err
+	}
+
 	return o.Table1.Alias + "." + o.Column1 + " < " + o.Table2.Alias + "." + o.Column2, nil
 }
 
@@ -99,6 +119,14 @@ func (o OnMore) gen(q query) (string, error) {
 	}
 
 	if err := q.checkTable(o.Table2); err != nil {
+		return "", err
+	}
+
+	if err := validateIdentifier(o.Column1, "on column"); err != nil {
+		return "", err
+	}
+
+	if err := validateIdentifier(o.Column2, "on column"); err != nil {
 		return "", err
 	}
 
