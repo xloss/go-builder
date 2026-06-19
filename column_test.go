@@ -453,8 +453,8 @@ func ExampleColumnCoalesce() {
 	fmt.Println(query1.Get())
 
 	// Result:
-	// SELECT COALESCE(table1_yzethlflca.column1, 5) AS a1, COALESCE(table1_yzethlflca.column2, 'text') AS a2 FROM table1 AS table1_yzethlflca
-	// map[]
+	// SELECT COALESCE(table1_epzedlhnbl.column1, @column1_default_gznyaknpce) AS a1, COALESCE(table1_epzedlhnbl.column2, @column2_default_odlytjcxsz) AS a2 FROM table1 AS table1_epzedlhnbl
+	// map[column1_default_gznyaknpce:5 column2_default_odlytjcxsz:text]
 	// <nil>
 }
 
@@ -487,7 +487,7 @@ func ExampleColumnValue() {
 	fmt.Println(query1.Get())
 
 	// Result:
-	// SELECT 1, '1' AS a1 FROM table1 AS table1_punanojozl
-	// map[]
+	// SELECT @value_ufglfjoels, @value_tbotyrxlvp AS a1 FROM table1 AS table1_luroihnrel
+	// map[value_tbotyrxlvp:1 value_ufglfjoels:1]
 	// <nil>
 }
