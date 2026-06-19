@@ -756,6 +756,92 @@ func TestWhereExists_gen(t *testing.T) {
 	}
 }
 
+func TestWhereExists_genDoesNotAccumulateColumns(t *testing.T) {
+	table1 := NewTable("table1")
+	table2 := NewTable("table2")
+
+	q1 := NewSelect()
+	q1.From(table1)
+
+	q2 := NewSelect()
+	q2.From(table2)
+	q2.Where(WhereAnd{List: []Where{
+		WhereEq{Table: table2, Column: "col1", Value: "value1"},
+		WhereEqColumn{Table1: table1, Column1: "col3", Table2: table2, Column2: "col2"},
+	}})
+
+	where := WhereExists{
+		Query: q2,
+	}
+
+	sql1, binds1, err := where.gen(q1)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(q2.columns) != 0 {
+		t.Errorf("q2.columns should have 0 values")
+	}
+
+	sql2, binds2, err := where.gen(q1)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(q2.columns) != 0 {
+		t.Errorf("q2.columns should have 0 values")
+	}
+
+	if strings.Count(sql1, "SELECT 1") != 1 {
+		t.Errorf("sql1 should contain only one SELECT 1, sql is %s", sql1)
+	}
+
+	if strings.Count(sql2, "SELECT 1") != 1 {
+		t.Errorf("sql2 should contain only one SELECT 1, sql is %s", sql2)
+	}
+
+	if len(binds1) != 1 {
+		t.Errorf("binds1 should have 1 value")
+	}
+
+	if len(binds2) != 1 {
+		t.Errorf("binds2 should have 1 value")
+	}
+}
+
+func TestWhereExists_genRestoresColumns(t *testing.T) {
+	table1 := NewTable("table1")
+	table2 := NewTable("table2")
+
+	q1 := NewSelect()
+	q1.From(table1)
+
+	q2 := NewSelect()
+	q2.From(table2)
+	q2.Column(ColumnName{Table: table2, Name: "col1"})
+
+	where := WhereExists{
+		Query: q2,
+	}
+
+	sql, _, err := where.gen(q1)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(q2.columns) != 1 {
+		t.Errorf("q2.columns should have 1 value")
+	}
+
+	if strings.Contains(sql, table2.Alias+".col1") {
+		t.Errorf("exists sql should not use original select columns, sql is %s", sql)
+	}
+
+	if strings.Count(sql, "SELECT 1") != 1 {
+		t.Errorf("sql should contain SELECT 1, sql is %s", sql)
+	}
+}
+
 func TestWhere_genInvalidColumn(t *testing.T) {
 	table := NewTable("table")
 	q := NewSelect()

@@ -506,13 +506,19 @@ func (w WhereExists) gen(q query) (string, map[string]any, error) {
 		return "", nil, fmt.Errorf("exists query cannot be nil")
 	}
 
-	w.Query.IsSub()
-	w.Query.Column(columnRaw{Value: "1"})
+	columns := w.Query.columns
+	isSub := w.Query.isSub
+
+	w.Query.columns = []Column{columnRaw{Value: "1"}}
+	w.Query.isSub = true
 
 	sql, binds, err := w.Query.Get()
 	if err != nil {
 		return "", nil, err
 	}
+
+	w.Query.columns = columns
+	w.Query.isSub = isSub
 
 	return "EXISTS(" + sql + ")", binds, nil
 }
