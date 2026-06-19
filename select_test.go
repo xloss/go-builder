@@ -651,6 +651,46 @@ func TestSelectQuery_GetAddsWhereBinds(t *testing.T) {
 	}
 }
 
+func TestSelectQuery_GetCountFilter(t *testing.T) {
+	table := NewTable("table")
+
+	sql, binds, err := NewSelect().
+		From(table).
+		Column(ColumnCount{Alias: "a1"}).
+		Column(ColumnCount{
+			Alias: "a2",
+			Filter: WhereIsNull{
+				Table:  table,
+				Column: "col1",
+			},
+		}).
+		Column(ColumnCount{
+			Alias: "a3",
+			Filter: WhereIsNotNull{
+				Table:  table,
+				Column: "col2",
+			},
+		}).
+		Get()
+	if err != nil {
+		t.Errorf("q.Get should not have returned error. return: %e", err)
+	}
+
+	if len(binds) != 0 {
+		t.Errorf("binds should have 0 values")
+	}
+
+	st := fmt.Sprintf(
+		"SELECT COUNT(*) AS a1, COUNT(*) FILTER (WHERE %[1]s.col1 IS NULL) AS a2, COUNT(*) FILTER (WHERE %[1]s.col2 IS NOT NULL) AS a3 FROM %[2]s AS %[1]s",
+		table.Alias,
+		table.Name,
+	)
+
+	if sql != st {
+		t.Errorf("bad returned sql. return:\n'%s'\n'%s'", sql, st)
+	}
+}
+
 func ExampleNewSelect() {
 	table1 := NewTable("table1")
 	query1 := NewSelect()

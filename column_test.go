@@ -159,6 +159,59 @@ func TestColumnCoalesce_gen(t *testing.T) {
 	}
 }
 
+func TestColumnCount_genFilter(t *testing.T) {
+	table := NewTable("table")
+	q := NewSelect()
+	q.From(table)
+
+	c1 := ColumnCount{
+		Alias: "a1",
+		Filter: WhereIsNull{
+			Table:  table,
+			Column: "col1",
+		},
+	}
+
+	s1, err := c1.gen(q)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if s1 != "COUNT(*) FILTER (WHERE "+table.Alias+".col1 IS NULL) AS a1" {
+		t.Fatal(s1)
+	}
+
+	c2 := ColumnCount{
+		Alias: "a2",
+		Filter: WhereEq{
+			Table:  table,
+			Column: "col2",
+			Value:  1,
+		},
+	}
+
+	s2, err := c2.gen(q)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var tag string
+
+	for k, v := range q.binds {
+		if v == 1 {
+			tag = k
+		}
+	}
+
+	if tag == "" {
+		t.Fatal("tag should not be empty")
+	}
+
+	if s2 != "COUNT(*) FILTER (WHERE "+table.Alias+".col2 = @"+tag+") AS a2" {
+		t.Fatal(s2)
+	}
+}
+
 func TestColumnJsonbArrayElementsText_gen(t *testing.T) {
 	table := NewTable("table")
 	q := NewSelect().From(table)

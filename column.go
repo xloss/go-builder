@@ -47,6 +47,7 @@ type ColumnCount struct {
 	Name     string
 	Alias    string // required
 	Distinct bool
+	Filter   Where
 }
 
 func (c ColumnCount) gen(q query) (string, error) {
@@ -74,7 +75,24 @@ func (c ColumnCount) gen(q query) (string, error) {
 		s += "*"
 	}
 
-	s += ") AS " + c.Alias
+	s += ")"
+
+	if c.Filter != nil {
+		filter, binds, err := c.Filter.gen(q)
+		if err != nil {
+			return "", err
+		}
+
+		if filter != "" {
+			for k, v := range binds {
+				q.addBind(k, v)
+			}
+
+			s += " FILTER (WHERE " + filter + ")"
+		}
+	}
+
+	s += " AS " + c.Alias
 
 	return s, nil
 }

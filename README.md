@@ -18,6 +18,7 @@ The package is intentionally small. It is not an ORM, not a schema mapper, and n
 * `EXISTS`
 * `GROUP BY`
 * `ORDER BY`
+* aggregate `FILTER (WHERE ...)` for `COUNT`
 * `LIMIT`
 * `OFFSET`
 * `RETURNING`
@@ -140,6 +141,24 @@ sql, args, err := builder.NewSelect().
 	Offset(40).
 	Get()
 ```
+
+`ColumnCount` can generate PostgreSQL aggregate filters:
+
+```go
+table := builder.NewTable("table")
+
+sql, args, err := builder.NewSelect().
+	From(table).
+	Column(builder.ColumnCount{Alias: "a1"}).
+	Column(builder.ColumnCount{
+		Alias: "a2",
+		Filter: builder.WhereIsNull{
+			Table:  table,
+			Column: "col1",
+		},
+	}).
+	Get()
+````
 
 ## JOIN
 
