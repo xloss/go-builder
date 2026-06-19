@@ -606,6 +606,27 @@ func TestSelectQuery_GetIncludesJoinUsedOnlyInGroup(t *testing.T) {
 	}
 }
 
+func TestSelectQuery_GetInvalidJoinTableName(t *testing.T) {
+	table1 := NewTable("table1")
+	table2 := NewTable("bad table")
+
+	q := NewSelect()
+	q.From(table1)
+	q.LeftJoin(table2, OnEq{
+		Table1:  table1,
+		Column1: "id",
+		Table2:  table2,
+		Column2: "table_id",
+	})
+	q.Column(ColumnName{Table: table1, Name: "id"})
+	q.Where(WhereEq{Table: table2, Column: "id", Value: 1})
+
+	_, _, err := q.Get()
+	if err == nil {
+		t.Errorf("q.Get should have returned error")
+	}
+}
+
 func ExampleNewSelect() {
 	table1 := NewTable("table1")
 	query1 := NewSelect()
