@@ -201,6 +201,10 @@ func (q *SelectQuery) getOrder() (string, error) {
 	s := " ORDER BY "
 
 	for i, o := range q.order {
+		if err := validateIdentifier(o.Column, "order column"); err != nil {
+			return "", err
+		}
+
 		if o.Table != nil {
 			if err := q.checkTable(o.Table); err != nil {
 				return "", err

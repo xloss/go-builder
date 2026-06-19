@@ -375,6 +375,29 @@ func TestSelectQuery_getOrder(t *testing.T) {
 	}
 }
 
+func TestSelectQuery_getOrderInvalidColumn(t *testing.T) {
+	q := NewSelect()
+	q.Order(Order{Column: "bad column"})
+
+	_, err := q.getOrder()
+	if err == nil {
+		t.Errorf("q.getOrder should have returned error")
+	}
+}
+
+func TestSelectQuery_getOrderInvalidTableColumn(t *testing.T) {
+	table := NewTable("table")
+
+	q := NewSelect()
+	q.From(table)
+	q.Order(Order{Table: table, Column: "bad column"})
+
+	_, err := q.getOrder()
+	if err == nil {
+		t.Errorf("q.getOrder should have returned error")
+	}
+}
+
 func TestSelectQuery_getJoin(t *testing.T) {
 	table1 := NewTable("table1")
 	table2 := NewTable("table2")

@@ -10,6 +10,10 @@ type GroupColumn struct {
 }
 
 func (g GroupColumn) gen(q query) (string, error) {
+	if err := validateIdentifier(g.Column, "group column"); err != nil {
+		return "", err
+	}
+
 	if g.Table != nil {
 		if err := q.checkTable(g.Table); err != nil {
 			return "", err

@@ -31,3 +31,27 @@ func TestGroupColumn_gen(t *testing.T) {
 		t.Fatal(sql)
 	}
 }
+
+func TestGroupColumn_genInvalidColumn(t *testing.T) {
+	q := NewSelect()
+
+	g := GroupColumn{Column: "bad column"}
+
+	_, err := g.gen(q)
+	if err == nil {
+		t.Errorf("g.gen should have returned error")
+	}
+}
+
+func TestGroupColumn_genInvalidTableColumn(t *testing.T) {
+	table := NewTable("table")
+	q := NewSelect()
+	q.From(table)
+
+	g := GroupColumn{Table: table, Column: "bad column"}
+
+	_, err := g.gen(q)
+	if err == nil {
+		t.Errorf("g.gen should have returned error")
+	}
+}
