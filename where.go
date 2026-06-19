@@ -484,7 +484,7 @@ func (w WhereJsonbTextInExist) gen(q query) (string, map[string]any, error) {
 
 	tag := w.Column + "_" + randStr()
 
-	return w.Table.Alias + "." + w.Column + " ?| @" + tag, map[string]any{tag: w.Values}, nil
+	return w.Table.Alias + "." + w.Column + " ?| @" + tag + "::text[]", map[string]any{tag: w.Values}, nil
 }
 
 type WhereExists struct {
