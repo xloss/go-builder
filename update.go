@@ -134,6 +134,8 @@ func (q *UpdateQuery) Get() (string, map[string]any, error) {
 		return "", nil, fmt.Errorf("table not set")
 	}
 
+	q.binds = make(map[string]any)
+
 	sets, err := q.getSet()
 	if err != nil {
 		return "", nil, err

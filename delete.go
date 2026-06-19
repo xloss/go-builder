@@ -62,6 +62,8 @@ func (q *DeleteQuery) Get() (string, map[string]any, error) {
 		return "", nil, fmt.Errorf("table not set")
 	}
 
+	q.binds = make(map[string]any)
+
 	where, err := q.getWhere()
 	if err != nil {
 		return "", nil, err

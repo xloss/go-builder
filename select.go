@@ -10,8 +10,8 @@ type SelectQuery struct {
 	joins   []*join
 	where   Where
 	order   []Order
-	limit   string
-	offset  string
+	limit   int
+	offset  int
 	group   []Group
 	binds   map[string]any
 	isSub   bool
@@ -88,8 +88,7 @@ func (q *SelectQuery) Limit(limit int) *SelectQuery {
 		return q
 	}
 
-	q.limit = "limit_" + randStr()
-	q.addBind(q.limit, limit)
+	q.limit = limit
 
 	return q
 }
@@ -99,8 +98,7 @@ func (q *SelectQuery) Offset(offset int) *SelectQuery {
 		return q
 	}
 
-	q.offset = "offset_" + randStr()
-	q.addBind(q.offset, offset)
+	q.offset = offset
 
 	return q
 }
@@ -265,6 +263,8 @@ func (q *SelectQuery) getGroup() (string, error) {
 }
 
 func (q *SelectQuery) Get() (string, map[string]any, error) {
+	q.binds = make(map[string]any)
+
 	sel, err := q.getSelect()
 	if err != nil {
 		return "", nil, err
@@ -296,13 +296,17 @@ func (q *SelectQuery) Get() (string, map[string]any, error) {
 	}
 
 	limit := ""
-	if q.limit != "" {
-		limit = " LIMIT @" + q.limit
+	if q.limit > 0 {
+		tag := "limit_" + randStr()
+		q.addBind(tag, q.limit)
+		limit = " LIMIT @" + tag
 	}
 
 	offset := ""
-	if q.offset != "" {
-		offset = " OFFSET @" + q.offset
+	if q.offset > 0 {
+		tag := "offset_" + randStr()
+		q.addBind(tag, q.offset)
+		offset = " OFFSET @" + tag
 	}
 
 	return sel + from + j + where + group + order + limit + offset, q.binds, nil

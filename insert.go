@@ -161,6 +161,8 @@ func (q *InsertQuery) Get() (string, map[string]any, error) {
 		return "", nil, fmt.Errorf("table not set")
 	}
 
+	q.binds = make(map[string]any)
+
 	values, err := q.getValues()
 	if err != nil {
 		return "", nil, err

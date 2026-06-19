@@ -287,3 +287,35 @@ func TestInsertQuery_Get(t *testing.T) {
 		t.Errorf("q.Get() returned '%v'", sql)
 	}
 }
+
+func TestInsertQuery_GetDoesNotAccumulateBinds(t *testing.T) {
+	table := NewTable("table")
+
+	q := NewInsert(table).
+		Value("col1", 5).
+		Value("col2", "str").
+		OnConflict("col1").
+		UpdateSet("col2", "val")
+
+	_, binds1, err := q.Get()
+	if err != nil {
+		t.Errorf("q.Get() returned %v", err)
+	}
+
+	if len(binds1) != 3 {
+		t.Errorf("binds1 should have 3 values")
+	}
+
+	_, binds2, err := q.Get()
+	if err != nil {
+		t.Errorf("q.Get() returned %v", err)
+	}
+
+	if len(binds2) != 3 {
+		t.Errorf("binds2 should have 3 values")
+	}
+
+	if len(q.binds) != 3 {
+		t.Errorf("q.binds should have 3 values")
+	}
+}

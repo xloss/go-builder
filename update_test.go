@@ -258,3 +258,33 @@ func TestUpdateQuery_Get(t *testing.T) {
 		t.Errorf("bad returned sql. return:\n'%s'\n'%s'", sql, st)
 	}
 }
+
+func TestUpdateQuery_GetDoesNotAccumulateBinds(t *testing.T) {
+	table := NewTable("table")
+
+	q := NewUpdate(table).
+		Set("col1", "value1").
+		Where(WhereEq{Table: table, Column: "col2", Value: 5})
+
+	_, binds1, err := q.Get()
+	if err != nil {
+		t.Errorf("q.Get() returned %v", err)
+	}
+
+	if len(binds1) != 2 {
+		t.Errorf("binds1 should have 2 values")
+	}
+
+	_, binds2, err := q.Get()
+	if err != nil {
+		t.Errorf("q.Get() returned %v", err)
+	}
+
+	if len(binds2) != 2 {
+		t.Errorf("binds2 should have 2 values")
+	}
+
+	if len(q.binds) != 2 {
+		t.Errorf("q.binds should have 2 values")
+	}
+}

@@ -182,3 +182,32 @@ func TestDeleteQuery_Get(t *testing.T) {
 		t.Errorf("bad returned where. return %s", sql)
 	}
 }
+
+func TestDeleteQuery_GetDoesNotAccumulateBinds(t *testing.T) {
+	table := NewTable("table")
+
+	q := NewDelete(table).
+		Where(WhereEq{Table: table, Column: "id", Value: 5})
+
+	_, binds1, err := q.Get()
+	if err != nil {
+		t.Errorf("q.Get() returned %v", err)
+	}
+
+	if len(binds1) != 1 {
+		t.Errorf("binds1 should have 1 value")
+	}
+
+	_, binds2, err := q.Get()
+	if err != nil {
+		t.Errorf("q.Get() returned %v", err)
+	}
+
+	if len(binds2) != 1 {
+		t.Errorf("binds2 should have 1 value")
+	}
+
+	if len(q.binds) != 1 {
+		t.Errorf("q.binds should have 1 value")
+	}
+}

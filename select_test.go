@@ -153,21 +153,12 @@ func TestSelectQuery_Limit(t *testing.T) {
 	q := NewSelect()
 	q.Limit(10)
 
-	var (
-		tag   string
-		value int
-	)
-
-	for k, v := range q.binds {
-		tag, value = k, v.(int)
+	if q.limit != 10 {
+		t.Errorf("q.limit should have 10")
 	}
 
-	if value != 10 {
-		t.Errorf("value should have 10")
-	}
-
-	if q.limit != tag {
-		t.Errorf("q.limit should have '%s'", tag)
+	if len(q.binds) != 0 {
+		t.Errorf("q.binds should have 0 values")
 	}
 }
 
@@ -175,21 +166,12 @@ func TestSelectQuery_Offset(t *testing.T) {
 	q := NewSelect()
 	q.Offset(10)
 
-	var (
-		tag   string
-		value int
-	)
-
-	for k, v := range q.binds {
-		tag, value = k, v.(int)
+	if q.offset != 10 {
+		t.Errorf("q.offset should have 10")
 	}
 
-	if value != 10 {
-		t.Errorf("value should have 10")
-	}
-
-	if q.offset != tag {
-		t.Errorf("q.offset should have '%s'", tag)
+	if len(q.binds) != 0 {
+		t.Errorf("q.binds should have 0 values")
 	}
 }
 
@@ -498,6 +480,39 @@ func TestSelectQuery_Get(t *testing.T) {
 	st := fmt.Sprintf("SELECT %[2]s.id, %[4]s.col FROM %[1]s AS %[2]s LEFT JOIN %[3]s AS %[4]s ON %[2]s.id = %[4]s.table_id WHERE %[2]s.id = @%[5]s ORDER BY %[2]s.name DESC LIMIT @%[6]s OFFSET @%[7]s", table1.Name, table1.Alias, table2.Name, table2.Alias, w, l, o)
 	if sql != st {
 		t.Errorf("bad returned sql. return:\n'%s'\n'%s'", sql, st)
+	}
+}
+
+func TestSelectQuery_GetDoesNotAccumulateBinds(t *testing.T) {
+	table := NewTable("table")
+
+	q := NewSelect().
+		From(table).
+		Column(ColumnName{Table: table, Name: "id"}).
+		Where(WhereEq{Table: table, Column: "id", Value: 1}).
+		Limit(10).
+		Offset(5)
+
+	_, binds1, err := q.Get()
+	if err != nil {
+		t.Errorf("q.Get should not have returned error. return: %e", err)
+	}
+
+	if len(binds1) != 3 {
+		t.Errorf("binds1 should have 3 values")
+	}
+
+	_, binds2, err := q.Get()
+	if err != nil {
+		t.Errorf("q.Get should not have returned error. return: %e", err)
+	}
+
+	if len(binds2) != 3 {
+		t.Errorf("binds2 should have 3 values")
+	}
+
+	if len(q.binds) != 3 {
+		t.Errorf("q.binds should have 3 values")
 	}
 }
 
