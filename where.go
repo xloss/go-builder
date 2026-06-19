@@ -230,8 +230,6 @@ func (w WhereLess) gen(q query) (string, map[string]any, error) {
 
 	tag := w.Column + "_" + randStr()
 
-	q.addBind(tag, w.Value)
-
 	return w.Table.Alias + "." + w.Column + " < @" + tag, map[string]any{tag: w.Value}, nil
 }
 
@@ -256,8 +254,6 @@ func (w WhereMoreEq) gen(q query) (string, map[string]any, error) {
 
 	tag := w.Column + "_" + randStr()
 
-	q.addBind(tag, w.Value)
-
 	return w.Table.Alias + "." + w.Column + " >= @" + tag, map[string]any{tag: w.Value}, nil
 }
 
@@ -281,8 +277,6 @@ func (w WhereLessEq) gen(q query) (string, map[string]any, error) {
 	}
 
 	tag := w.Column + "_" + randStr()
-
-	q.addBind(tag, w.Value)
 
 	return w.Table.Alias + "." + w.Column + " <= @" + tag, map[string]any{tag: w.Value}, nil
 }

@@ -627,6 +627,30 @@ func TestSelectQuery_GetInvalidJoinTableName(t *testing.T) {
 	}
 }
 
+func TestSelectQuery_GetAddsWhereBinds(t *testing.T) {
+	table := NewTable("table")
+
+	q := NewSelect().
+		From(table).
+		Column(ColumnName{Table: table, Name: "id"}).
+		Where(WhereLessEq{Table: table, Column: "id", Value: 10})
+
+	_, binds, err := q.Get()
+	if err != nil {
+		t.Errorf("q.Get should not have returned error. return: %e", err)
+	}
+
+	if len(binds) != 1 {
+		t.Errorf("binds should have 1 value")
+	}
+
+	for _, v := range binds {
+		if v != 10 {
+			t.Errorf("bind value should be 10")
+		}
+	}
+}
+
 func ExampleNewSelect() {
 	table1 := NewTable("table1")
 	query1 := NewSelect()

@@ -876,3 +876,39 @@ func TestWhere_genInvalidColumn(t *testing.T) {
 		}
 	}
 }
+
+func TestWhere_genDoesNotAddBindsToQuery(t *testing.T) {
+	table := NewTable("table")
+
+	list := []Where{
+		WhereEq{Table: table, Column: "col", Value: 1},
+		WhereNotEq{Table: table, Column: "col", Value: 1},
+		WhereIn{Table: table, Column: "col", Values: []int{1, 2}},
+		WhereMore{Table: table, Column: "col", Value: 1},
+		WhereLess{Table: table, Column: "col", Value: 1},
+		WhereMoreEq{Table: table, Column: "col", Value: 1},
+		WhereLessEq{Table: table, Column: "col", Value: 1},
+		WhereILike{Table: table, Column: "col", Value: "value"},
+		WhereFullText{Table: table, Column: "col", Language: "english", Value: "value"},
+		WhereJsonbTextExist{Table: table, Column: "col", Value: "value"},
+		WhereJsonbTextInExist{Table: table, Column: "col", Values: []string{"value"}},
+	}
+
+	for _, where := range list {
+		q := NewSelect()
+		q.From(table)
+
+		_, binds, err := where.gen(q)
+		if err != nil {
+			t.Errorf("where.gen should not have returned error. return: %e", err)
+		}
+
+		if len(binds) != 1 {
+			t.Errorf("binds should have 1 value")
+		}
+
+		if len(q.binds) != 0 {
+			t.Errorf("q.binds should have 0 values")
+		}
+	}
+}
