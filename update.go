@@ -126,6 +126,10 @@ func (q *UpdateQuery) getReturns() (string, error) {
 	var s string
 
 	for i, v := range q.returns {
+		if v == nil {
+			return "", fmt.Errorf("return column cannot be nil")
+		}
+
 		c, err := v.gen(q)
 		if err != nil {
 			return "", err

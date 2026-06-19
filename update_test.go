@@ -246,6 +246,17 @@ func TestUpdateQuery_getReturns(t *testing.T) {
 	}
 }
 
+func TestUpdateQuery_getReturnsNilColumn(t *testing.T) {
+	table := NewTable("table")
+	q := NewUpdate(table)
+	q.Return(nil)
+
+	_, err := q.getReturns()
+	if err == nil {
+		t.Errorf("q.getReturns should have returned error")
+	}
+}
+
 func TestUpdateQuery_Get(t *testing.T) {
 	table := NewTable("table")
 

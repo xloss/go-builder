@@ -126,6 +126,10 @@ func (q *SelectQuery) getSelect() (string, error) {
 	s := "SELECT "
 
 	for i, col := range q.columns {
+		if col == nil {
+			return "", fmt.Errorf("column cannot be nil")
+		}
+
 		c, err := col.gen(q)
 		if err != nil {
 			return "", err
@@ -258,6 +262,10 @@ func (q *SelectQuery) getGroup() (string, error) {
 	s := " GROUP BY "
 
 	for i, g := range q.group {
+		if g == nil {
+			return "", fmt.Errorf("group cannot be nil")
+		}
+
 		sql, err := g.gen(q)
 		if err != nil {
 			return "", err

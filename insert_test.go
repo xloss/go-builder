@@ -313,6 +313,17 @@ func TestInsertQuery_getReturns(t *testing.T) {
 	}
 }
 
+func TestInsertQuery_getReturnsNilColumn(t *testing.T) {
+	table := NewTable("table")
+	q := NewInsert(table)
+	q.Return(nil)
+
+	_, err := q.getReturns()
+	if err == nil {
+		t.Errorf("q.getReturns should have returned error")
+	}
+}
+
 func TestInsertQuery_Get(t *testing.T) {
 	table := NewTable("table")
 	q := NewInsert(table)

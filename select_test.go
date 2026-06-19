@@ -245,6 +245,16 @@ func TestSelectQuery_getSelect(t *testing.T) {
 	}
 }
 
+func TestSelectQuery_getSelectNilColumn(t *testing.T) {
+	q := NewSelect()
+	q.Column(nil)
+
+	_, err := q.getSelect()
+	if err == nil {
+		t.Errorf("q.getSelect should have returned error")
+	}
+}
+
 func TestSelectQuery_getFrom(t *testing.T) {
 	table1 := NewTable("table1")
 	table2 := NewTable("table2")
@@ -479,6 +489,16 @@ func TestSelectQuery_getGroup(t *testing.T) {
 	}
 	if group != " GROUP BY "+table.Alias+".col1, col2" {
 		t.Errorf("bad returned order. return %s", group)
+	}
+}
+
+func TestSelectQuery_getGroupNilGroup(t *testing.T) {
+	q := NewSelect()
+	q.Group(nil)
+
+	_, err := q.getGroup()
+	if err == nil {
+		t.Errorf("q.getGroup should have returned error")
 	}
 }
 
