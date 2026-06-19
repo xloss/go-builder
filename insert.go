@@ -22,8 +22,16 @@ func NewInsert(table *Table) *InsertQuery {
 	}
 }
 
-func (q *InsertQuery) checkTable(table *Table) bool {
-	return q.table == table
+func (q *InsertQuery) checkTable(table *Table) error {
+	if table == nil {
+		return fmt.Errorf("table cannot be nil")
+	}
+
+	if q.table != table {
+		return fmt.Errorf("table %s does not exist", table.Name)
+	}
+
+	return nil
 }
 
 func (q *InsertQuery) addBind(key string, value any) {

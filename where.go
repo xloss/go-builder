@@ -20,8 +20,8 @@ func (w WhereEq) gen(q query) (string, map[string]any, error) {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
 
-	if !q.checkTable(w.Table) {
-		return "", nil, fmt.Errorf("table %s does not exist", w.Table.Name)
+	if err := q.checkTable(w.Table); err != nil {
+		return "", nil, err
 	}
 
 	tag := w.Column + "_" + randStr()
@@ -40,8 +40,8 @@ func (w WhereNotEq) gen(q query) (string, map[string]any, error) {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
 
-	if !q.checkTable(w.Table) {
-		return "", nil, fmt.Errorf("table %s does not exist", w.Table.Name)
+	if err := q.checkTable(w.Table); err != nil {
+		return "", nil, err
 	}
 
 	tag := w.Column + "_" + randStr()
@@ -61,12 +61,12 @@ func (w WhereEqColumn) gen(q query) (string, map[string]any, error) {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
 
-	if !q.checkTable(w.Table1) {
-		return "", nil, fmt.Errorf("table %s does not exist", w.Table1.Name)
+	if err := q.checkTable(w.Table1); err != nil {
+		return "", nil, err
 	}
 
-	if !q.checkTable(w.Table2) {
-		return "", nil, fmt.Errorf("table %s does not exist", w.Table2.Name)
+	if err := q.checkTable(w.Table2); err != nil {
+		return "", nil, err
 	}
 
 	return w.Table1.Alias + "." + w.Column1 + " = " + w.Table2.Alias + "." + w.Column2, nil, nil
@@ -84,12 +84,12 @@ func (w WhereNotEqColumn) gen(q query) (string, map[string]any, error) {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
 
-	if !q.checkTable(w.Table1) {
-		return "", nil, fmt.Errorf("table %s does not exist", w.Table1.Name)
+	if err := q.checkTable(w.Table1); err != nil {
+		return "", nil, err
 	}
 
-	if !q.checkTable(w.Table2) {
-		return "", nil, fmt.Errorf("table %s does not exist", w.Table2.Name)
+	if err := q.checkTable(w.Table2); err != nil {
+		return "", nil, err
 	}
 
 	return w.Table1.Alias + "." + w.Column1 + " <> " + w.Table2.Alias + "." + w.Column2, nil, nil
@@ -105,8 +105,8 @@ func (w WhereIsNull) gen(q query) (string, map[string]any, error) {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
 
-	if !q.checkTable(w.Table) {
-		return "", nil, fmt.Errorf("table %s does not exist", w.Table.Name)
+	if err := q.checkTable(w.Table); err != nil {
+		return "", nil, err
 	}
 
 	return w.Table.Alias + "." + w.Column + " IS NULL", map[string]any{}, nil
@@ -122,8 +122,8 @@ func (w WhereIsNotNull) gen(q query) (string, map[string]any, error) {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
 
-	if !q.checkTable(w.Table) {
-		return "", nil, fmt.Errorf("table %s does not exist", w.Table.Name)
+	if err := q.checkTable(w.Table); err != nil {
+		return "", nil, err
 	}
 
 	return w.Table.Alias + "." + w.Column + " IS NOT NULL", nil, nil
@@ -140,8 +140,8 @@ func (w WhereIn) gen(q query) (string, map[string]any, error) {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
 
-	if !q.checkTable(w.Table) {
-		return "", nil, fmt.Errorf("table %s does not exist", w.Table.Name)
+	if err := q.checkTable(w.Table); err != nil {
+		return "", nil, err
 	}
 
 	tag := w.Column + "_" + randStr()
@@ -160,8 +160,8 @@ func (w WhereMore) gen(q query) (string, map[string]any, error) {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
 
-	if !q.checkTable(w.Table) {
-		return "", nil, fmt.Errorf("table %s does not exist", w.Table.Name)
+	if err := q.checkTable(w.Table); err != nil {
+		return "", nil, err
 	}
 
 	tag := w.Column + "_" + randStr()
@@ -180,8 +180,8 @@ func (w WhereLess) gen(q query) (string, map[string]any, error) {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
 
-	if !q.checkTable(w.Table) {
-		return "", nil, fmt.Errorf("table %s does not exist", w.Table.Name)
+	if err := q.checkTable(w.Table); err != nil {
+		return "", nil, err
 	}
 
 	tag := w.Column + "_" + randStr()
@@ -202,8 +202,8 @@ func (w WhereMoreEq) gen(q query) (string, map[string]any, error) {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
 
-	if !q.checkTable(w.Table) {
-		return "", nil, fmt.Errorf("table %s does not exist", w.Table.Name)
+	if err := q.checkTable(w.Table); err != nil {
+		return "", nil, err
 	}
 
 	tag := w.Column + "_" + randStr()
@@ -224,8 +224,8 @@ func (w WhereLessEq) gen(q query) (string, map[string]any, error) {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
 
-	if !q.checkTable(w.Table) {
-		return "", nil, fmt.Errorf("table %s does not exist", w.Table.Name)
+	if err := q.checkTable(w.Table); err != nil {
+		return "", nil, err
 	}
 
 	tag := w.Column + "_" + randStr()
@@ -245,12 +245,12 @@ func (w WhereMoreColumn) gen(q query) (string, map[string]any, error) {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
 
-	if !q.checkTable(w.Table1) {
-		return "", nil, fmt.Errorf("table %s does not exist", w.Table1.Name)
+	if err := q.checkTable(w.Table1); err != nil {
+		return "", nil, err
 	}
 
-	if !q.checkTable(w.Table2) {
-		return "", nil, fmt.Errorf("table %s does not exist", w.Table2.Name)
+	if err := q.checkTable(w.Table2); err != nil {
+		return "", nil, err
 	}
 
 	return w.Table1.Alias + "." + w.Column1 + " > " + w.Table2.Alias + "." + w.Column2, map[string]any{}, nil
@@ -267,8 +267,8 @@ func (w WhereILike) gen(q query) (string, map[string]any, error) {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
 
-	if !q.checkTable(w.Table) {
-		return "", nil, fmt.Errorf("table %s does not exist", w.Table.Name)
+	if err := q.checkTable(w.Table); err != nil {
+		return "", nil, err
 	}
 
 	tag := w.Column + "_" + randStr()
@@ -288,8 +288,8 @@ func (w WhereFullText) gen(q query) (string, map[string]any, error) {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
 
-	if !q.checkTable(w.Table) {
-		return "", nil, fmt.Errorf("table %s does not exist", w.Table.Name)
+	if err := q.checkTable(w.Table); err != nil {
+		return "", nil, err
 	}
 
 	tag := w.Column + "_" + randStr()
@@ -376,8 +376,8 @@ func (w WhereJsonbTextExist) gen(q query) (string, map[string]any, error) {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
 
-	if !q.checkTable(w.Table) {
-		return "", nil, fmt.Errorf("table %s does not exist", w.Table.Name)
+	if err := q.checkTable(w.Table); err != nil {
+		return "", nil, err
 	}
 
 	tag := w.Column + "_" + randStr()
@@ -396,8 +396,8 @@ func (w WhereJsonbTextInExist) gen(q query) (string, map[string]any, error) {
 		return "", nil, fmt.Errorf("query cannot be nil")
 	}
 
-	if !q.checkTable(w.Table) {
-		return "", nil, fmt.Errorf("table %s does not exist", w.Table.Name)
+	if err := q.checkTable(w.Table); err != nil {
+		return "", nil, err
 	}
 
 	tag := w.Column + "_" + randStr()

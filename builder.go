@@ -1,7 +1,7 @@
 package builder
 
 type query interface {
-	checkTable(table *Table) bool
+	checkTable(table *Table) error
 	addBind(key string, value any)
 	Get() (string, map[string]any, error)
 }

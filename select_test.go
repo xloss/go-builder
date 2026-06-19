@@ -28,22 +28,31 @@ func TestSelectQuery_addBind(t *testing.T) {
 func TestSelectQuery_checkTable(t *testing.T) {
 	table1 := NewTable("table1")
 	table2 := NewTable("table2")
+	table3 := NewTable("table3")
 
 	q := NewSelect()
 	q.From(table1)
+	q.LeftJoin(table2, OnEq{
+		Table1:  table1,
+		Table2:  table2,
+		Column1: "id",
+		Column2: "table_id",
+	})
 
-	if !q.checkTable(table1) {
-		t.Errorf("q.checkTable() returned false")
+	if err := q.checkTable(table1); err != nil {
+		t.Errorf("q.checkTable should not have returned error. return: %e", err)
 	}
 
-	if q.checkTable(table2) {
-		t.Errorf("q.checkTable() returned true")
+	if err := q.checkTable(table2); err != nil {
+		t.Errorf("q.checkTable should not have returned error. return: %e", err)
 	}
 
-	q.IsSub()
+	if err := q.checkTable(table3); err == nil {
+		t.Errorf("q.checkTable should have returned error")
+	}
 
-	if !q.checkTable(table2) {
-		t.Errorf("q.checkTable() returned false")
+	if err := q.checkTable(nil); err == nil {
+		t.Errorf("q.checkTable should have returned error")
 	}
 }
 

@@ -16,8 +16,8 @@ type ColumnName struct {
 }
 
 func (c ColumnName) gen(q query) (string, error) {
-	if !q.checkTable(c.Table) {
-		return "", fmt.Errorf("table %s is not exist", c.Table)
+	if err := q.checkTable(c.Table); err != nil {
+		return "", err
 	}
 
 	if c.Name == "" {
@@ -53,7 +53,11 @@ func (c ColumnCount) gen(q query) (string, error) {
 
 	s := "COUNT("
 
-	if q.checkTable(c.Table) && c.Name != "" {
+	if c.Name != "" {
+		if err := q.checkTable(c.Table); err != nil {
+			return "", err
+		}
+
 		if c.Distinct {
 			s += "DISTINCT "
 		}
@@ -76,8 +80,8 @@ type ColumnCoalesce struct {
 }
 
 func (c ColumnCoalesce) gen(q query) (string, error) {
-	if !q.checkTable(c.Table) {
-		return "", fmt.Errorf("table %s is not exist", c.Table)
+	if err := q.checkTable(c.Table); err != nil {
+		return "", err
 	}
 
 	if c.Name == "" {
@@ -112,8 +116,8 @@ type ColumnJsonbArrayElementsText struct {
 }
 
 func (c ColumnJsonbArrayElementsText) gen(q query) (string, error) {
-	if !q.checkTable(c.Table) {
-		return "", fmt.Errorf("table %s is not exist", c.Table)
+	if err := q.checkTable(c.Table); err != nil {
+		return "", err
 	}
 
 	if c.Name == "" {

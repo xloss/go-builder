@@ -48,12 +48,12 @@ func (o OnEq) gen(q query) (string, error) {
 		return "", fmt.Errorf("query cannot be nil")
 	}
 
-	if !q.checkTable(o.Table1) {
-		return "", fmt.Errorf("table %s does not exist", o.Table1.Name)
+	if err := q.checkTable(o.Table1); err != nil {
+		return "", err
 	}
 
-	if !q.checkTable(o.Table2) {
-		return "", fmt.Errorf("table %s does not exist", o.Table2.Name)
+	if err := q.checkTable(o.Table2); err != nil {
+		return "", err
 	}
 
 	return o.Table1.Alias + "." + o.Column1 + " = " + o.Table2.Alias + "." + o.Column2, nil
@@ -71,12 +71,12 @@ func (o OnLess) gen(q query) (string, error) {
 		return "", fmt.Errorf("query cannot be nil")
 	}
 
-	if !q.checkTable(o.Table1) {
-		return "", fmt.Errorf("table %s does not exist", o.Table1.Name)
+	if err := q.checkTable(o.Table1); err != nil {
+		return "", err
 	}
 
-	if !q.checkTable(o.Table2) {
-		return "", fmt.Errorf("table %s does not exist", o.Table2.Name)
+	if err := q.checkTable(o.Table2); err != nil {
+		return "", err
 	}
 
 	return o.Table1.Alias + "." + o.Column1 + " < " + o.Table2.Alias + "." + o.Column2, nil
@@ -94,12 +94,12 @@ func (o OnMore) gen(q query) (string, error) {
 		return "", fmt.Errorf("query cannot be nil")
 	}
 
-	if !q.checkTable(o.Table1) {
-		return "", fmt.Errorf("table %s does not exist", o.Table1.Name)
+	if err := q.checkTable(o.Table1); err != nil {
+		return "", err
 	}
 
-	if !q.checkTable(o.Table2) {
-		return "", fmt.Errorf("table %s does not exist", o.Table2.Name)
+	if err := q.checkTable(o.Table2); err != nil {
+		return "", err
 	}
 
 	return o.Table1.Alias + "." + o.Column1 + " > " + o.Table2.Alias + "." + o.Column2, nil

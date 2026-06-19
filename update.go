@@ -19,8 +19,16 @@ func NewUpdate(table *Table) *UpdateQuery {
 	}
 }
 
-func (q *UpdateQuery) checkTable(table *Table) bool {
-	return q.table == table
+func (q *UpdateQuery) checkTable(table *Table) error {
+	if table == nil {
+		return fmt.Errorf("table cannot be nil")
+	}
+
+	if q.table != table {
+		return fmt.Errorf("table %s does not exist", table.Name)
+	}
+
+	return nil
 }
 
 func (q *UpdateQuery) addBind(key string, value any) {

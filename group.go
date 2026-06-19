@@ -1,7 +1,5 @@
 package builder
 
-import "fmt"
-
 type Group interface {
 	gen(q query) (string, error)
 }
@@ -13,8 +11,8 @@ type GroupColumn struct {
 
 func (g GroupColumn) gen(q query) (string, error) {
 	if g.Table != nil {
-		if !q.checkTable(g.Table) {
-			return "", fmt.Errorf("table %s does not exist", g.Table.Name)
+		if err := q.checkTable(g.Table); err != nil {
+			return "", err
 		}
 
 		return g.Table.Alias + "." + g.Column, nil

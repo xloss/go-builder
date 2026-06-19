@@ -23,26 +23,29 @@ func NewSelect() *SelectQuery {
 	}
 }
 
-func (q *SelectQuery) checkTable(table *Table) bool {
+func (q *SelectQuery) checkTable(table *Table) error {
+	if table == nil {
+		return fmt.Errorf("table cannot be nil")
+	}
+
 	if q.isSub {
-		return true
+		return nil
 	}
 
 	for _, t := range q.from {
 		if t == table {
-			return true
+			return nil
 		}
 	}
 
 	for _, j := range q.joins {
 		if j.Table == table {
 			j.Used = true
-
-			return true
+			return nil
 		}
 	}
 
-	return false
+	return fmt.Errorf("table %s does not exist", table.Name)
 }
 
 func (q *SelectQuery) addBind(key string, value any) {
@@ -146,6 +149,10 @@ func (q *SelectQuery) getFrom() (string, error) {
 	s := " FROM "
 
 	for i, from := range q.from {
+		if from == nil {
+			return "", fmt.Errorf("from table cannot be nil")
+		}
+
 		sql, binds, err := from.gen()
 		if err != nil {
 			return "", err
@@ -195,8 +202,8 @@ func (q *SelectQuery) getOrder() (string, error) {
 
 	for i, o := range q.order {
 		if o.Table != nil {
-			if !q.checkTable(o.Table) {
-				return "", fmt.Errorf("table %s is not exist", o.Table)
+			if err := q.checkTable(o.Table); err != nil {
+				return "", err
 			}
 
 			s += o.Table.Alias + "."

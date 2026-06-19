@@ -31,12 +31,12 @@ func TestInsertQuery_checkTable(t *testing.T) {
 
 	q := NewInsert(table1)
 
-	if !q.checkTable(table1) {
-		t.Errorf("q.checkTable() returned false")
+	if err := q.checkTable(table1); err != nil {
+		t.Errorf("q.checkTable should not have returned error. return: %e", err)
 	}
 
-	if q.checkTable(table2) {
-		t.Errorf("q.checkTable() returned true")
+	if err := q.checkTable(table2); err == nil {
+		t.Errorf("q.checkTable should not have returned error. return: %e", err)
 	}
 }
 
