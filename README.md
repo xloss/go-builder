@@ -10,6 +10,7 @@ The package is intentionally small. It is not an ORM, not a schema mapper, and n
 
 * `SELECT`
 * `INSERT`
+* `INSERT DEFAULT VALUES`
 * `UPDATE`
 * `DELETE`
 * `LEFT JOIN`
@@ -223,6 +224,19 @@ sql, args, err := builder.NewInsert(users).
 	Value("email", "user@example.com").
 	Value("name", "John").
 	Return(builder.ColumnName{Table: users, Name: "id"}).
+	Get()
+```
+
+## INSERT with DEFAULT VALUES
+
+Use `DefaultValues` when a row should be inserted using only database defaults.
+
+```go
+table := builder.NewTable("table")
+
+sql, args, err := builder.NewInsert(table).
+	DefaultValues().
+	Return(builder.ColumnName{Table: table, Name: "id"}).
 	Get()
 ```
 

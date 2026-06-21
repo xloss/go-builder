@@ -64,6 +64,17 @@ func TestInsertQuery_Value(t *testing.T) {
 	}
 }
 
+func TestInsertQuery_DefaultValues(t *testing.T) {
+	table := NewTable("table")
+
+	q := NewInsert(table)
+	q.DefaultValues()
+
+	if !q.defaultValues {
+		t.Errorf("q.defaultValues should have true")
+	}
+}
+
 func TestInsertQuery_Return(t *testing.T) {
 	table := NewTable("table")
 	q := NewInsert(table)
@@ -164,6 +175,41 @@ func TestInsertQuery_getValuesInvalidColumn(t *testing.T) {
 	q.Value("bad column", 1)
 
 	_, err := q.getValues()
+	if err == nil {
+		t.Errorf("q.getValues should have returned error")
+	}
+}
+
+func TestInsertQuery_getValuesDefaultValues(t *testing.T) {
+	table := NewTable("table")
+
+	q := NewInsert(table)
+	q.DefaultValues()
+
+	values, err := q.getValues()
+
+	if err != nil {
+		t.Errorf("q.getValues() returned %v", err)
+	}
+
+	if values != " DEFAULT VALUES" {
+		t.Errorf("q.getValues() returned %v", values)
+	}
+
+	if len(q.binds) != 0 {
+		t.Errorf("q.binds should be empty")
+	}
+}
+
+func TestInsertQuery_getValuesDefaultValuesWithValues(t *testing.T) {
+	table := NewTable("table")
+
+	q := NewInsert(table)
+	q.DefaultValues()
+	q.Value("col1", 1)
+
+	_, err := q.getValues()
+
 	if err == nil {
 		t.Errorf("q.getValues should have returned error")
 	}
@@ -428,5 +474,27 @@ func TestInsertQuery_GetSubqueryTable(t *testing.T) {
 	_, _, err := q.Get()
 	if err == nil {
 		t.Errorf("q.Get should have returned error")
+	}
+}
+
+func TestInsertQuery_GetDefaultValuesReturning(t *testing.T) {
+	table := NewTable("table")
+
+	q := NewInsert(table)
+	q.DefaultValues()
+	q.Return(ColumnName{Table: table, Name: "id"})
+
+	sql, binds, err := q.Get()
+
+	if err != nil {
+		t.Errorf("q.Get() returned %v", err)
+	}
+
+	if len(binds) != 0 {
+		t.Errorf("q.Get() should not have binds")
+	}
+
+	if sql != fmt.Sprintf("INSERT INTO %[1]s AS %[2]s DEFAULT VALUES RETURNING %[2]s.id", table.Name, table.Alias) {
+		t.Errorf("q.Get() returned '%v'", sql)
 	}
 }

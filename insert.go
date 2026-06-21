@@ -8,6 +8,7 @@ import (
 type InsertQuery struct {
 	table             *Table
 	values            []insertValue
+	defaultValues     bool
 	conflict          []string
 	conflictDoNothing bool
 	update            []set
@@ -44,6 +45,12 @@ func (q *InsertQuery) Value(column string, v any) *InsertQuery {
 	return q
 }
 
+func (q *InsertQuery) DefaultValues() *InsertQuery {
+	q.defaultValues = true
+
+	return q
+}
+
 func (q *InsertQuery) Return(c ...Column) *InsertQuery {
 	q.returns = append(q.returns, c...)
 
@@ -76,6 +83,14 @@ func (q *InsertQuery) UpdateSetNow(column string) *InsertQuery {
 }
 
 func (q *InsertQuery) getValues() (string, error) {
+	if q.defaultValues {
+		if len(q.values) != 0 {
+			return "", fmt.Errorf("default values cannot be used with insert values")
+		}
+
+		return " DEFAULT VALUES", nil
+	}
+
 	if len(q.values) == 0 {
 		return "", fmt.Errorf("no values")
 	}
