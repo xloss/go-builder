@@ -2,6 +2,7 @@ package builder
 
 import (
 	"fmt"
+	"slices"
 )
 
 type SelectQuery struct {
@@ -32,16 +33,13 @@ func (q *SelectQuery) checkTable(table *Table) error {
 		return nil
 	}
 
-	for _, t := range q.from {
-		if t == table {
-			return nil
-		}
+	if slices.Contains(q.from, table) {
+		return nil
 	}
 
 	for _, j := range q.joins {
 		if j.Table == table {
-			j.Used = true
-			return nil
+			return j.use(q)
 		}
 	}
 

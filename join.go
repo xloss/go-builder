@@ -9,6 +9,20 @@ type join struct {
 	Left  bool
 }
 
+func (j *join) use(q query) error {
+	if j.Used {
+		return nil
+	}
+
+	j.Used = true
+
+	if j.On == nil {
+		return nil
+	}
+
+	return j.On.use(q)
+}
+
 func (j join) Gen(q query) (string, error) {
 	if q == nil {
 		return "", fmt.Errorf("query cannot be nil")

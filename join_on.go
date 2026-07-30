@@ -7,10 +7,29 @@ import (
 
 type On interface {
 	gen(query query) (string, error)
+	use(query query) error
 }
 
 type OnAnd struct {
 	List []On
+}
+
+func (o OnAnd) use(q query) error {
+	if q == nil {
+		return fmt.Errorf("query cannot be nil")
+	}
+
+	for _, on := range o.List {
+		if on == nil {
+			return fmt.Errorf("on cannot be nil")
+		}
+
+		if err := on.use(q); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (o OnAnd) gen(q query) (string, error) {
@@ -47,6 +66,18 @@ type OnEq struct {
 	Column2 string
 }
 
+func (o OnEq) use(q query) error {
+	if q == nil {
+		return fmt.Errorf("query cannot be nil")
+	}
+
+	if err := q.checkTable(o.Table1); err != nil {
+		return err
+	}
+
+	return q.checkTable(o.Table2)
+}
+
 func (o OnEq) gen(q query) (string, error) {
 	if q == nil {
 		return "", fmt.Errorf("query cannot be nil")
@@ -78,6 +109,18 @@ type OnLess struct {
 	Column2 string
 }
 
+func (o OnLess) use(q query) error {
+	if q == nil {
+		return fmt.Errorf("query cannot be nil")
+	}
+
+	if err := q.checkTable(o.Table1); err != nil {
+		return err
+	}
+
+	return q.checkTable(o.Table2)
+}
+
 func (o OnLess) gen(q query) (string, error) {
 	if q == nil {
 		return "", fmt.Errorf("query cannot be nil")
@@ -107,6 +150,18 @@ type OnMore struct {
 	Table2  *Table
 	Column1 string
 	Column2 string
+}
+
+func (o OnMore) use(q query) error {
+	if q == nil {
+		return fmt.Errorf("query cannot be nil")
+	}
+
+	if err := q.checkTable(o.Table1); err != nil {
+		return err
+	}
+
+	return q.checkTable(o.Table2)
 }
 
 func (o OnMore) gen(q query) (string, error) {

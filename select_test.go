@@ -606,6 +606,53 @@ func TestSelectQuery_GetIncludesJoinUsedOnlyInGroup(t *testing.T) {
 	}
 }
 
+func TestSelectQuery_GetIncludesJoinUsedOnlyInJoin(t *testing.T) {
+	table1 := NewTable("table1")
+	table2 := NewTable("table2")
+	table3 := NewTable("table3")
+	q := NewSelect()
+	q.From(table1)
+	q.LeftJoin(table2, OnEq{
+		Table1:  table1,
+		Column1: "id",
+		Table2:  table2,
+		Column2: "table_id",
+	})
+	q.LeftJoin(table3, OnEq{
+		Table1:  table2,
+		Column1: "id",
+		Table2:  table3,
+		Column2: "table_id",
+	})
+	q.Column(ColumnName{Table: table3, Name: "col"})
+
+	sql, _, err := q.Get()
+	if err != nil {
+		t.Errorf("q.Get should not have returned error. return: %e", err)
+	}
+
+	st := fmt.Sprintf(
+		"SELECT %[6]s.col FROM %[1]s AS %[2]s LEFT JOIN %[3]s AS %[4]s ON %[2]s.id = %[4]s.table_id LEFT JOIN %[5]s AS %[6]s ON %[4]s.id = %[6]s.table_id",
+		table1.Name,
+		table1.Alias,
+		table2.Name,
+		table2.Alias,
+		table3.Name,
+		table3.Alias,
+	)
+	if sql != st {
+		t.Errorf("bad returned sql. return:\n'%s'\n'%s'", sql, st)
+	}
+
+	sql, _, err = q.Get()
+	if err != nil {
+		t.Errorf("q.Get should not have returned error. return: %e", err)
+	}
+	if sql != st {
+		t.Errorf("bad returned sql. return:\n'%s'\n'%s'", sql, st)
+	}
+}
+
 func TestSelectQuery_GetInvalidJoinTableName(t *testing.T) {
 	table1 := NewTable("table1")
 	table2 := NewTable("bad table")
