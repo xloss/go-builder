@@ -13,6 +13,8 @@ The package is intentionally small. It is not an ORM, not a schema mapper, and n
 * `INSERT DEFAULT VALUES`
 * `UPDATE`
 * `DELETE`
+* `JOIN`
+* `INNER JOIN`
 * `LEFT JOIN`
 * `WHERE`
 * `AND` / `OR` where groups
@@ -181,22 +183,48 @@ sql, args, err := builder.NewSelect().
 
 ## JOIN
 
+`Join`, `InnerJoin`, and `LeftJoin` use the same `On` conditions.
+
 ```go
-users := builder.NewTable("users")
-posts := builder.NewTable("posts")
+table1 := builder.NewTable("table1")
+table2 := builder.NewTable("table2")
 
 sql, args, err := builder.NewSelect().
-	From(users).
-	LeftJoin(posts, builder.OnEq{
-		Table1:  users,
+	From(table1).
+	Join(table2, builder.OnEq{
+		Table1:  table1,
 		Column1: "id",
-		Table2:  posts,
-		Column2: "user_id",
+		Table2:  table2,
+		Column2: "table_id",
 	}).
-	Column(builder.ColumnName{Table: users, Name: "id"}).
-	Column(builder.ColumnName{Table: posts, Name: "title"}).
+	Column(builder.ColumnName{Table: table1, Name: "col1"}).
+	Column(builder.ColumnName{Table: table2, Name: "col2"}).
 	Get()
 ```
+
+Use `InnerJoin` to generate an explicit `INNER JOIN`:
+
+```go
+q.InnerJoin(table2, builder.OnEq{
+	Table1:  table1,
+	Column1: "id",
+	Table2:  table2,
+	Column2: "table_id",
+})
+```
+
+Use `LeftJoin` to generate a `LEFT JOIN`:
+
+```go
+q.LeftJoin(table2, builder.OnEq{
+	Table1:  table1,
+	Column1: "id",
+	Table2:  table2,
+	Column2: "table_id",
+})
+```
+
+`JOIN` and `INNER JOIN` have the same PostgreSQL semantics.
 
 Joins are included only when the joined table is used by the query. For example, a joined table may be used in selected columns, `WHERE`, `GROUP BY`, or `ORDER BY`.
 

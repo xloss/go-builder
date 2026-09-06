@@ -40,6 +40,18 @@ func TestJoin_Gen(t *testing.T) {
 	if sql != fmt.Sprintf(" LEFT JOIN %[1]s AS %[2]s ON %[2]s.id = %[3]s.table_id", table1.Name, table1.Alias, table2.Alias) {
 		t.Fatal(sql)
 	}
+
+	j.Left = false
+	j.Inner = true
+
+	sql, err = j.Gen(q)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if sql != fmt.Sprintf(" INNER JOIN %[1]s AS %[2]s ON %[2]s.id = %[3]s.table_id", table1.Name, table1.Alias, table2.Alias) {
+		t.Fatal(sql)
+	}
 }
 
 func TestJoin_GenInvalidTableName(t *testing.T) {

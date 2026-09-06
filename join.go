@@ -7,6 +7,7 @@ type join struct {
 	On    On
 	Used  bool
 	Left  bool
+	Inner bool
 }
 
 func (j *join) use(q query) error {
@@ -49,6 +50,8 @@ func (j join) Gen(q query) (string, error) {
 
 	if j.Left {
 		s += " LEFT"
+	} else if j.Inner {
+		s += " INNER"
 	}
 
 	return s + " JOIN " + j.Table.Name + " AS " + j.Table.Alias + " ON " + on, nil

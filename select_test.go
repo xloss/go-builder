@@ -120,6 +120,94 @@ func TestSelectQuery_LeftJoin(t *testing.T) {
 	}
 }
 
+func TestSelectQuery_Join(t *testing.T) {
+	table1 := NewTable("table1")
+	table2 := NewTable("table2")
+
+	q := NewSelect()
+	q.From(table1)
+	q.Column(ColumnName{Table: table2, Name: "col"})
+	q.Join(table2, OnEq{
+		Table1:  table1,
+		Table2:  table2,
+		Column1: "id",
+		Column2: "table_id",
+	})
+
+	if len(q.joins) != 1 {
+		t.Errorf("q.joins should have 1 join")
+	}
+
+	if q.joins[0].Table != table2 {
+		t.Errorf("q.joins[0].Table should have table %v", table2)
+	}
+
+	if q.joins[0].Left {
+		t.Errorf("q.joins[0].Left should have false")
+	}
+
+	if q.joins[0].Inner {
+		t.Errorf("q.joins[0].Inner should have false")
+	}
+
+	if q.joins[0].Used {
+		t.Errorf("q.joins[0].Used should have false")
+	}
+
+	_, err := q.joins[0].Gen(q)
+	if err != nil {
+		t.Errorf("q.joins[0].Gen should not have error")
+	}
+
+	if !q.joins[0].Used {
+		t.Errorf("q.joins[0].Used should have true")
+	}
+}
+
+func TestSelectQuery_InnerJoin(t *testing.T) {
+	table1 := NewTable("table1")
+	table2 := NewTable("table2")
+
+	q := NewSelect()
+	q.From(table1)
+	q.Column(ColumnName{Table: table2, Name: "col"})
+	q.InnerJoin(table2, OnEq{
+		Table1:  table1,
+		Table2:  table2,
+		Column1: "id",
+		Column2: "table_id",
+	})
+
+	if len(q.joins) != 1 {
+		t.Errorf("q.joins should have 1 join")
+	}
+
+	if q.joins[0].Table != table2 {
+		t.Errorf("q.joins[0].Table should have table %v", table2)
+	}
+
+	if q.joins[0].Left {
+		t.Errorf("q.joins[0].Left should have false")
+	}
+
+	if !q.joins[0].Inner {
+		t.Errorf("q.joins[0].Inner should have true")
+	}
+
+	if q.joins[0].Used {
+		t.Errorf("q.joins[0].Used should have false")
+	}
+
+	_, err := q.joins[0].Gen(q)
+	if err != nil {
+		t.Errorf("q.joins[0].Gen should not have error")
+	}
+
+	if !q.joins[0].Used {
+		t.Errorf("q.joins[0].Used should have true")
+	}
+}
+
 func TestSelectQuery_Where(t *testing.T) {
 	table := NewTable("table")
 

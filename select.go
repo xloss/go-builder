@@ -62,6 +62,25 @@ func (q *SelectQuery) Column(c ...Column) *SelectQuery {
 	return q
 }
 
+func (q *SelectQuery) Join(table *Table, on On) *SelectQuery {
+	q.joins = append(q.joins, &join{
+		Table: table,
+		On:    on,
+	})
+
+	return q
+}
+
+func (q *SelectQuery) InnerJoin(table *Table, on On) *SelectQuery {
+	q.joins = append(q.joins, &join{
+		Table: table,
+		On:    on,
+		Inner: true,
+	})
+
+	return q
+}
+
 func (q *SelectQuery) LeftJoin(table *Table, on On) *SelectQuery {
 	q.joins = append(q.joins, &join{
 		Table: table,
