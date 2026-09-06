@@ -741,6 +741,82 @@ func TestSelectQuery_GetIncludesJoinUsedOnlyInJoin(t *testing.T) {
 	}
 }
 
+func TestSelectQuery_GetNestedSubqueryJoin(t *testing.T) {
+	table1 := NewTable("table1")
+
+	latestQuery := NewSelect()
+	latestQuery.From(table1)
+	latestQuery.Column(ColumnName{Table: table1, Name: "id"})
+	latestQuery.Where(WhereEq{Table: table1, Column: "col1", Value: 1})
+	latest := NewTableSub(latestQuery)
+
+	table2 := NewTable("table2")
+
+	preferredQuery := NewSelect()
+	preferredQuery.From(latest)
+	preferredQuery.InnerJoin(table2, OnEq{
+		Table1:  table2,
+		Column1: "id",
+		Table2:  latest,
+		Column2: "id",
+	})
+	preferredQuery.Column(ColumnName{Table: table2, Name: "id"})
+	preferredQuery.Where(WhereEq{Table: table2, Column: "col2", Value: 2})
+	preferred := NewTableSub(preferredQuery)
+
+	table3 := NewTable("table3")
+
+	q := NewSelect()
+	q.From(preferred)
+	q.InnerJoin(latest, OnEq{
+		Table1:  latest,
+		Column1: "id",
+		Table2:  preferred,
+		Column2: "id",
+	})
+	q.InnerJoin(table3, OnEq{
+		Table1:  table3,
+		Column1: "id",
+		Table2:  latest,
+		Column2: "id",
+	})
+	q.Column(ColumnName{Table: table3, Name: "id"})
+
+	sql, binds, err := q.Get()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if strings.Count(sql, "INNER JOIN (SELECT") != 1 {
+		t.Errorf("sql should contain a subquery join, sql is %s", sql)
+	}
+
+	if !strings.Contains(sql, ") AS "+latest.Alias+" ON "+latest.Alias+".id = "+preferred.Alias+".id") {
+		t.Errorf("sql should contain joined latest subquery, sql is %s", sql)
+	}
+
+	if len(binds) != 3 {
+		t.Fatalf("binds should have 3 values, got %d", len(binds))
+	}
+
+	values := map[int]int{}
+	for _, v := range binds {
+		value, ok := v.(int)
+		if !ok {
+			t.Fatalf("bind value should be int, got %T", v)
+		}
+
+		values[value]++
+	}
+
+	if values[1] != 2 {
+		t.Errorf("bind value 1 should occur twice, got %d", values[1])
+	}
+	if values[2] != 1 {
+		t.Errorf("bind value 2 should occur once, got %d", values[2])
+	}
+}
+
 func TestSelectQuery_GetInvalidJoinTableName(t *testing.T) {
 	table1 := NewTable("table1")
 	table2 := NewTable("bad table")

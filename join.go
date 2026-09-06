@@ -46,6 +46,15 @@ func (j join) Gen(q query) (string, error) {
 		return "", err
 	}
 
+	table, binds, err := j.Table.gen()
+	if err != nil {
+		return "", err
+	}
+
+	for k, v := range binds {
+		q.addBind(k, v)
+	}
+
 	s := ""
 
 	if j.Left {
@@ -54,5 +63,5 @@ func (j join) Gen(q query) (string, error) {
 		s += " INNER"
 	}
 
-	return s + " JOIN " + j.Table.Name + " AS " + j.Table.Alias + " ON " + on, nil
+	return s + " JOIN " + table + " ON " + on, nil
 }

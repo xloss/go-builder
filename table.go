@@ -80,12 +80,10 @@ func validateJoinTable(table *Table) error {
 		return fmt.Errorf("join table cannot be nil")
 	}
 
-	if table.Query != nil {
-		return fmt.Errorf("subquery cannot be used as join table")
-	}
-
-	if err := validateQualifiedIdentifier(table.Name, "join table name"); err != nil {
-		return err
+	if table.Query == nil {
+		if err := validateQualifiedIdentifier(table.Name, "join table name"); err != nil {
+			return err
+		}
 	}
 
 	if err := validateIdentifier(table.Alias, "join table alias"); err != nil {
